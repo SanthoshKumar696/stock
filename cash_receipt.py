@@ -28,10 +28,10 @@ def focus_next_widget(event):
 def exit_program():
     root.quit()
 
-#### fetch main_ledger value for main_product
-def fetch_main_ledger():
+#### fetch main_product value for main_product
+def fetch_main_product():
     try:
-        cursor.execute("SELECT UPPER(name) FROM main_ledger")
+        cursor.execute("SELECT UPPER(name) FROM main_product")
         return [row[0] for row in cursor.fetchall()]
     except sqlite3.OperationalError as e:
         messagebox.showerror("Database Error", f"An error occurred: {e}")
@@ -395,11 +395,9 @@ exit_menu.add_command(label="Exit", command=exit_program)
 cash_receipt_label = tk.Label(root, text="Cash Receipt", font=("Times", 25, "bold"), bg="lightpink", fg="Green")
 cash_receipt_label.pack(pady=10)
 #############################################################################################################################
-# main_frame = tk.Frame(root, bg="lightpink")
-# main_frame.pack(fill="both", expand=True)
 
-# left_container = tk.Frame(main_frame, bg="lightpink", width=screen_width // 2)
-# left_container.pack(side="left", fill="y", padx=10, pady=10)
+# left_container = tk.Frame(root, bg="lightpink", width=screen_width)
+# left_container.pack( fill="y", padx=10, pady=10)
 
 # # Add a frame for the radio buttons
 # radio_frame = tk.Frame(left_container, bg="lightpink", bd=2, relief="solid", padx=10, pady=5)
@@ -448,7 +446,7 @@ middle_frame = tk.Frame(root, bg="lightpink")
 middle_frame.pack(pady=10)
 
 tk.Label(middle_frame, text="Main Product", bg="lightpink", font=("Times", 15)).grid(row=0, column=0, padx=5, sticky="w")
-main_product_combo = ttk.Combobox(middle_frame, values=fetch_main_ledger(), state="readonly", width=20, justify="center", font=("Times",14))
+main_product_combo = ttk.Combobox(middle_frame, values=fetch_main_product(), state="readonly", width=20, justify="center", font=("Times",14))
 main_product_combo.grid(row=1, column=0, padx=5, sticky="w")
 main_product_combo.bind('<<ComboboxSelected>>',update_sub_products)
 main_product_combo.bind("<Return>", focus_next_widget)
@@ -506,7 +504,7 @@ amount_entry.bind("<Return>", focus_next_widget)
 tk.Label(bottom_frame, text="Narration", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=5, sticky="w")
 narration_entry = tk.Entry(bottom_frame, width=30, justify="center", font=("Times",14), bd=4)
 narration_entry.grid(row=1, column=2, padx=5, columnspan=3, sticky="w")
-narration_entry.bind("<Return>", focus_next_widget)
+narration_entry.bind("<Return>", add_item)
 
 
 

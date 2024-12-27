@@ -1,125 +1,166 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from datetime import datetime
 import sqlite3
 
-# Database connection
-conn = sqlite3.connect('stock.db')
+# Database setup
+conn = sqlite3.connect("example.db")
 cursor = conn.cursor()
 
-# Function to focus on the next widget
-def focus_next_widget(event):
-    """Move the focus to the next widget."""
-    event.widget.tk_focusNext().focus()
-    return "break"
+# Create a table for demonstration purposes
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS saved_data (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT,
+    "transaction" TEXT,
+    name TEXT,
+    main_product TEXT,
+    sub_product TEXT,
+    gross_wt REAL,
+    stones REAL,
+    touch REAL,
+    net_wt REAL,
+    mc_at TEXT,
+    mc TEXT,
+    rate REAL,
+    amount REAL,
+    narration TEXT
+)
+""")
+conn.commit()
 
-# Function to handle exit menu action
-def exit_program():
-    root.quit()
-
-# Create the main root window
+# Initialize the main application window
 root = tk.Tk()
-root.title("Jewelry Management System")
+root.title("Operation Application")
+root.geometry("800x600")
 
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-root.geometry(f"{screen_width}x{screen_height}")
-root.configure(bg="lightpink")
+# Screen width for layout
+screen_width = 400
 
-# Create menu bar
-menu_bar = tk.Menu(root)
-root.config(menu=menu_bar)
-
-# Main layout frame
-main_frame = tk.Frame(root, bg="lightpink")
-main_frame.pack(fill="both", expand=True)
-
-# Left container for widgets
-left_container = tk.Frame(main_frame, bg="lightpink", width=screen_width // 2)
+# Left container for operations
+left_container = tk.Frame(root, bg="lightpink", width=screen_width)
 left_container.pack(side="left", fill="y", padx=10, pady=10)
 
 # Add a frame for the radio buttons
 radio_frame = tk.Frame(left_container, bg="lightpink", bd=2, relief="solid", padx=10, pady=5)
 radio_frame.pack(pady=5)
 
-# Radio buttons for Add, Correct, Delete
+# Default operation variable
 operation_var = tk.StringVar(value="Add")
+
+# Radio buttons for Add, Correction, Delete
 tk.Radiobutton(radio_frame, text="Add", variable=operation_var, value="Add", bg="lightpink", font=("Times", 14)).pack(side="left", padx=10)
 tk.Radiobutton(radio_frame, text="Correction", variable=operation_var, value="Correction", bg="lightpink", font=("Times", 14)).pack(side="left", padx=10)
 tk.Radiobutton(radio_frame, text="Delete", variable=operation_var, value="Delete", bg="lightpink", font=("Times", 14)).pack(side="left", padx=10)
 
-# Top Frame for Basic Details
-top_frame = tk.Frame(left_container, bg="lightpink")
-top_frame.pack(pady=10)
+# Input fields
+date_entry = tk.Entry(left_container, font=("Times", 14))
+date_entry.pack(pady=5)
+party_entry = tk.Entry(left_container, font=("Times", 14))
+party_entry.pack(pady=5)
 
-# Row 1: Date, Transaction, Party Name
-tk.Label(top_frame, text="Date", bg="lightpink", font=("Times", 15)).grid(row=0, column=0, padx=10, sticky="e")
-date_entry = tk.Entry(top_frame, width=15, justify="center", font=("Times", 14), bd=4)
-date_entry.insert(0, datetime.now().strftime("%d-%m-%Y"))
-date_entry.grid(row=0, column=1, padx=10)
-date_entry.bind("<Return>", focus_next_widget)
+transaction_combo = ttk.Combobox(left_container, values=["Sale", "Purchase"], font=("Times", 14))
+transaction_combo.pack(pady=5)
 
-tk.Label(top_frame, text="Transaction", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=10, sticky="e")
-transaction_combo = ttk.Combobox(top_frame, values=["Cash Receipt", "Cash Payment", "Purchase", "Purchase Return", "Sales", "Sales Return"], width=20, font=("Times", 14))
-transaction_combo.grid(row=0, column=3, padx=10)
-transaction_combo.bind("<Return>", focus_next_widget)
+main_product_combo = ttk.Combobox(left_container, values=["Gold", "Silver"], font=("Times", 14))
+main_product_combo.pack(pady=5)
 
-tk.Label(top_frame, text="Party Name", bg="lightpink", font=("Times", 15)).grid(row=0, column=4, padx=10, sticky="e")
-party_entry = tk.Entry(top_frame, width=20, font=("Times", 14), bd=4)
-party_entry.grid(row=0, column=5, padx=10)
-party_entry.bind("<Return>", focus_next_widget)
+sub_product_combo = ttk.Combobox(left_container, values=["Ring", "Necklace"], font=("Times", 14))
+sub_product_combo.pack(pady=5)
 
-# Middle Frame for Product Details
-middle_frame = tk.Frame(left_container, bg="lightpink")
-middle_frame.pack(pady=10)
+gross_wt_entry = tk.Entry(left_container, font=("Times", 14))
+gross_wt_entry.pack(pady=5)
+stones_entry = tk.Entry(left_container, font=("Times", 14))
+stones_entry.pack(pady=5)
+touch_entry = tk.Entry(left_container, font=("Times", 14))
+touch_entry.pack(pady=5)
 
-# Labels and Entries
-columns = [
-    ("Main Product", 20), 
-    ("Design", 20), 
-    ("Gross Wt", 10), 
-    ("Stones", 10),
-    ("Touch", 10),
-    ("Net Wt", 10),
-    ("MC@", 10),
-    ("MC", 10)
-]
+mc_at_entry = tk.Entry(left_container, font=("Times", 14))
+mc_at_entry.pack(pady=5)
+mc_entry = tk.Entry(left_container, font=("Times", 14))
+mc_entry.pack(pady=5)
 
-for i, (label, width) in enumerate(columns):
-    tk.Label(middle_frame, text=label, bg="lightpink", font=("Times", 15)).grid(row=0, column=i, padx=10, sticky="w")
-    tk.Entry(middle_frame, width=width, font=("Times", 14), bd=4).grid(row=1, column=i, padx=10, pady=5)
+rate_entry = tk.Entry(left_container, font=("Times", 14))
+rate_entry.pack(pady=5)
 
-# Frame for Treeview and Scrollbars
-tree_frame = tk.Frame(left_container, bg="lightpink", width=600, height=400)
-tree_frame.pack(pady=10)
+narration_entry = tk.Entry(left_container, font=("Times", 14))
+narration_entry.pack(pady=5)
 
-# Create Treeview widget
-columns = ("#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10", "#11", "#12", "#13", "#14", "#15")
-tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=8)
+# Treeview to display saved data
+columns = ("sl_no", "date", "name", "main_product", "sub_product", "transaction", "gross_wt", "stones", "touch", "net_wt", "mc_at", "mc", "rate", "amount", "narration")
+tree = ttk.Treeview(root, columns=columns, show="headings", height=10)
+tree.pack(side="right", fill="both", expand=True)
 
-# Set headings
 for col in columns:
     tree.heading(col, text=col)
 
-# Add scrollbars
-x_scrollbar = tk.Scrollbar(tree_frame, orient="horizontal", command=tree.xview)
-y_scrollbar = tk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)
-tree.configure(xscrollcommand=x_scrollbar.set, yscrollcommand=y_scrollbar.set)
+# Functionality for adding items
+def add_item():
+    cursor.execute("SELECT MAX(ID) FROM saved_data")
+    max_id = cursor.fetchone()[0]
+    sl_no = (max_id + 1) if max_id else 1
+    date = date_entry.get()
+    name = party_entry.get()
+    transaction = transaction_combo.get()
+    main_product = main_product_combo.get()
+    sub_product = sub_product_combo.get()
+    try:
+        gross_wt = float(gross_wt_entry.get())
+        stones = float(stones_entry.get())
+        touch = float(touch_entry.get())
+        rate = float(rate_entry.get())
+    except ValueError:
+        messagebox.showerror("Input Error", "Please enter numeric values for weights, touch, and rate.")
+        return
 
-tree.grid(row=0, column=0, sticky="nsew")
-x_scrollbar.grid(row=1, column=0, sticky="ew")
-y_scrollbar.grid(row=0, column=1, sticky="ns")
+    mc_at = mc_at_entry.get()
+    mc = mc_entry.get()
+    narration = narration_entry.get()
 
-# Footer Frame for Buttons
-footer_frame = tk.Frame(left_container, bg="lightpink")
-footer_frame.pack(pady=20)
+    adjusted_wt = gross_wt - stones
+    net_wt = adjusted_wt * (touch / 100)
+    amount = net_wt * rate
 
-tk.Button(footer_frame, text="Add", width=12, bg="green", fg="white").grid(row=0, column=0, padx=10)
-tk.Button(footer_frame, text="Delete", width=12, bg="red", fg="white").grid(row=0, column=1, padx=10)
-tk.Button(footer_frame, text="Save", width=12, bg="blue", fg="white").grid(row=0, column=2, padx=10)
+    if name and transaction:
+        tree.insert("", "end", values=(sl_no, date, name, main_product, sub_product, transaction, gross_wt, stones, touch, net_wt, mc_at, mc, rate, amount, narration))
+        clear_fields()
 
-# Right container for future use
-right_container = tk.Frame(main_frame, bg="lightpink", width=screen_width // 2)
-right_container.pack(side="right", fill="both", expand=True)
+        try:
+            cursor.execute("""
+            INSERT INTO saved_data (date, "transaction", name, main_product, sub_product, gross_wt, stones, touch, net_wt, mc_at, mc, rate, amount, narration)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (date, transaction, name, main_product, sub_product, gross_wt, stones, touch, net_wt, mc_at, mc, rate, amount, narration))
+            conn.commit()
+            messagebox.showinfo("Success", "Receipt saved successfully!")
+        except sqlite3.Error as e:
+            messagebox.showerror("Database Error", f"Error: {e}")
+    else:
+        messagebox.showerror("Input Error", "Please fill all required fields.")
 
+# Function to clear input fields
+def clear_fields():
+    date_entry.delete(0, tk.END)
+    party_entry.delete(0, tk.END)
+    transaction_combo.set("")
+    main_product_combo.set("")
+    sub_product_combo.set("")
+    gross_wt_entry.delete(0, tk.END)
+    stones_entry.delete(0, tk.END)
+    touch_entry.delete(0, tk.END)
+    mc_at_entry.delete(0, tk.END)
+    mc_entry.delete(0, tk.END)
+    rate_entry.delete(0, tk.END)
+    narration_entry.delete(0, tk.END)
+
+# Function to handle operations
+def perform_operation():
+    if operation_var.get() == "Add":
+        add_item()
+    else:
+        messagebox.showinfo("Operation", f"{operation_var.get()} functionality is not implemented yet!")
+
+# Button to trigger operation
+action_button = tk.Button(left_container, text="Perform Operation", command=perform_operation, bg="lightblue", font=("Times", 14))
+action_button.pack(pady=10)
+
+# Start the application
 root.mainloop()

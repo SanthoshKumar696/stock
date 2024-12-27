@@ -8,7 +8,7 @@ cursor = conn.cursor()
 
 # Create main_ledger table
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS main_ledger (
+CREATE TABLE IF NOT EXISTS main_product (
     code TEXT PRIMARY KEY,
     name TEXT UNIQUE
 )
@@ -27,6 +27,8 @@ def open_main_product(root):
     ledger_window.geometry(f"{screen_width}x{screen_height}")
     
     ledger_window.configure(bg="lightblue")
+
+    tk.Label(ledger_window,text="Main Product", font=("Times", 25, "bold"), fg="green", bg="lightblue").pack(padx=10, pady=20)
 
     # Frame for the left section (Radio Buttons and Inputs)
     left_frame = tk.Frame(ledger_window, bg="lightblue", height=300)  # Decreased height
@@ -64,7 +66,7 @@ def open_main_product(root):
             name_entry.delete(0, tk.END)
 
             try:
-                cursor.execute("INSERT INTO main_ledger (code, name) VALUES (?, ?)", (code, name))
+                cursor.execute("INSERT INTO main_product (code, name) VALUES (?, ?)", (code, name))
                 conn.commit()
                 messagebox.showinfo("Success", f"Product '{name}' added successfully!")
                 code_entry.delete(0, tk.END)
@@ -134,7 +136,7 @@ def open_main_product(root):
         for item in stored_details_tree.get_children():
             stored_details_tree.delete(item)  # Clear existing data
         try:
-            cursor.execute("SELECT code, name FROM main_ledger")
+            cursor.execute("SELECT code, name FROM main_product")
             for row in cursor.fetchall():
                 stored_details_tree.insert("", "end", values=row)
         except sqlite3.DatabaseError as e:
@@ -155,7 +157,7 @@ def open_main_product(root):
 
         try:
             # Delete from database
-            cursor.execute("DELETE FROM main_ledger WHERE code = ?", (code,))
+            cursor.execute("DELETE FROM main_product WHERE code = ?", (code,))
             conn.commit()
 
             # Delete from treeview
@@ -200,7 +202,7 @@ def open_main_product(root):
             if new_code and new_name:
                 try:
                     # Update in the database
-                    cursor.execute("UPDATE main_ledger SET code = ?, name = ? WHERE code = ?", 
+                    cursor.execute("UPDATE main_product SET code = ?, name = ? WHERE code = ?", 
                                    (new_code, new_name, code))
                     conn.commit()
 
