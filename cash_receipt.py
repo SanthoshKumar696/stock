@@ -39,10 +39,10 @@ def fetch_main_product():
 
 
 
-#### fetch sub_ledger value for sub_product
-def fetch_sub_ledger(selected_main_product):
+#### fetch sub_product value for sub_product
+def fetch_sub_product(selected_main_product):
     try:
-        cursor.execute("SELECT UPPER(name) FROM sub_ledger WHERE UPPER(main_product) = ?", (selected_main_product.upper(),))
+        cursor.execute("SELECT UPPER(name) FROM sub_product WHERE UPPER(main_product) = ?", (selected_main_product.upper(),))
 
         return [row[0] for row in cursor.fetchall()]
     except sqlite3.OperationalError as e:
@@ -53,7 +53,7 @@ def update_sub_products(event):
     selected_main_product = main_product_combo.get()
     print(f"Selected Main Product: {selected_main_product}")
     if selected_main_product:
-        sub_products = fetch_sub_ledger(selected_main_product)
+        sub_products = fetch_sub_product(selected_main_product)
         print(f"Sub Products: {sub_products}")
         sub_product_combo['values'] = sub_products
         sub_product_combo.set("")  # Clear the current selection
@@ -166,7 +166,7 @@ def add_item():
     if not rate:
         messagebox.error("Input Error", "Please enter Rate")
         return 
-    amount=net_wt*rate
+    amount=(net_wt*rate)+mc
 
     if name and transaction :
         tree.insert("", "end", values=(sl_no, date, name, main_product, sub_product, transaction, gross_wt, stones, touch,net_wt, mc_at, mc, rate, amount, narration))

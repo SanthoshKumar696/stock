@@ -109,21 +109,7 @@ def open_sub_product(root):  # Start the Sub Ledger page
     )
     credit_period_entry.grid(row=4, column=2, columnspan=3, padx=10, pady=10)
 
-    # Sixth Line: Last Name
-    tk.Label(
-        sub_product_window,
-        text="Last Name:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=5, column=1, sticky="w", padx=10, pady=10)
-
-    last_name_entry = tk.Entry(
-        sub_product_window,
-        textvariable=last_name_var,
-        font=("Arial", 12),
-        width=30
-    )
-    last_name_entry.grid(row=5, column=2, columnspan=4, padx=10, pady=10)
+    
 
     # Right-side Frame to Show Entered Details
     details_frame = tk.Frame(sub_product_window, bg="lightgray", width=400, height=300)
