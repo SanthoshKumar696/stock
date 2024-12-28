@@ -137,7 +137,8 @@ def calculate_amount(event=None):
     ############################################################
 
 # Functionality for buttons
-def add_item():
+def add_item(event=None):
+    # print("add_ item function triggered")
     cursor.execute("select max(ID) from saved_data")
     max_id = cursor.fetchone()[0]
     sl_no = (max_id+1) if max_id else 1
@@ -166,7 +167,7 @@ def add_item():
     if not rate:
         messagebox.error("Input Error", "Please enter Rate")
         return 
-    amount=(net_wt*rate)+mc
+    amount=(net_wt*rate)+float(mc)
 
     if name and transaction :
         tree.insert("", "end", values=(sl_no, date, name, main_product, sub_product, transaction, gross_wt, stones, touch,net_wt, mc_at, mc, rate, amount, narration))
@@ -197,6 +198,8 @@ def add_item():
         messagebox.showerror("Input Error", "Amount must be a number!")
     except sqlite3.Error as e:
         messagebox.showerror("Database Error", f"Error: {e}")
+
+    
 
 # Function to delete an item from the treeview and database
 def delete_item():
@@ -507,7 +510,6 @@ narration_entry.grid(row=1, column=2, padx=5, columnspan=3, sticky="w")
 narration_entry.bind("<Return>", add_item)
 
 
-
 # Frame for the Treeview and Scrollbars
 tree_frame = tk.Frame(root, bg="lightpink", width=600, height=800)
 tree_frame.pack(pady=10)
@@ -570,7 +572,7 @@ tree_frame.grid_columnconfigure(0, weight=1)
 footer_frame = tk.Frame(root, bg="lightpink")
 footer_frame.pack(pady=20)
 
-tk.Button(footer_frame, text="Add", width=12, bg="green", fg="white", command=add_item).grid(row=0, column=0, padx=10)
+# tk.Button(footer_frame, text="Add", width=12, bg="green", fg="white").grid(row=0, column=0, padx=10)
 tk.Button(footer_frame, text="Delete", width=12, bg="red", fg="white", command=delete_item).grid(row=0, column=1, padx=10)
 tk.Button(footer_frame, text="Save", width=12, bg="blue", fg="white", command=save_items).grid(row=0, column=2, padx=10)
 correction_button=tk.Button(footer_frame, text="Correction", width=12, bg="purple", fg="white", command=correction_item)

@@ -25,6 +25,7 @@ def party_balance(root): #### party balance page start
     balance_var = tk.StringVar(value="opening")
     columns_var = tk.StringVar(value="two")
     message_box_var = tk.StringVar()
+   
 
     # First Line: Title
     tk.Label(
@@ -41,6 +42,9 @@ def party_balance(root): #### party balance page start
         font=("Arial", 12, "bold"),
         bg="lightblue"
     ).grid(row=1, column=0, sticky="w", padx=10, pady=10)
+
+
+    
 
     ledger_options = ["All Ledger", "Individual Ledger"]
     for i, option in enumerate(ledger_options):

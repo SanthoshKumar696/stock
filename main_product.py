@@ -31,7 +31,7 @@ def open_main_product(root):
     tk.Label(ledger_window,text="Main Product", font=("Times", 25, "bold"), fg="green", bg="lightblue").pack(padx=10, pady=20)
 
     # Frame for the left section (Radio Buttons and Inputs)
-    left_frame = tk.Frame(ledger_window, bg="lightblue", height=300)  # Decreased height
+    left_frame = tk.Frame(ledger_window, bg="lightblue", height=350)  # Decreased height
     left_frame.pack(side="left", fill="y", padx=5, pady=10)  # Reduced horizontal padding
 
     # Input for Code
