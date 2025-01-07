@@ -136,7 +136,7 @@ def opening_balance(root):  # Start the opening balance
 
     # Sub Ledger
     tk.Label(top_frame, text="Sub Ledger Name", font=("Times", 15), bg="lightblue").grid(row=0, column=2, padx=10)
-    sub_ledger_combo = ttk.Combobox(top_frame, state="readonly", width=25)
+    sub_ledger_combo = ttk.Combobox(top_frame, state="readonly", width=25, font=("Times", 14))
     sub_ledger_combo.grid(row=1, column=2, padx=10)
     sub_ledger_combo.bind('<Return>', focus_next_widget)
 

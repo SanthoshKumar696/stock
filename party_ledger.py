@@ -1,111 +1,82 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 
 def party_ledger(root):   #### party ledger page start
     party_ledger_window = tk.Toplevel()
     party_ledger_window.title("Party Ledger")
+    
+    # Get screen dimensions
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-
-    party_ledger_window.geometry(f"{screen_width}x{screen_height}")
+    
+    # Set the window size to cover the full screen
+    party_ledger_window.geometry(f"{screen_width}x{screen_height}")  
     party_ledger_window.configure(bg="lightblue")
 
-    tk.Label(
-        party_ledger_window, text="Party Ledger",
-        font=("Arial", 16, "bold"), bg="lightblue"
-    ).grid(row=0, column=0, columnspan=5, pady=20)
+    # Create a frame to hold all content, making it top-center-aligned
+    content_frame = tk.Frame(party_ledger_window, bg="lightblue")
+    content_frame.place(relx=0.5, rely=0, anchor="n")  # Top-center alignment
 
-    # Frame to group all options with a border
-    options_frame = tk.Frame(party_ledger_window, bg="lightblue", bd=2, relief="groove")
-    options_frame.grid(row=1, column=0, columnspan=5, padx=20, pady=20, sticky="nsew")
+    # Title Label (Top Label)
+    title_frame = tk.Frame(content_frame, bg="lightblue")
+    title_frame.pack(pady=20)
+    party_ledger_label = tk.Label(title_frame, text="Party Ledger", font=("Times", 25, "bold"), bg="lightblue", fg="green")
+    party_ledger_label.pack()
 
-    # Balance options
-    tk.Label(
-        options_frame, text="Select Ledger:", font=("Arial", 12, "bold"), bg="lightblue"
-    ).grid(row=0, column=0, sticky="w", padx=10, pady=10)
+    # Select Ledger (Row 1)
+    row1_frame = tk.Frame(content_frame, bg="lightblue")
+    row1_frame.pack(fill='x', pady=10)
+    tk.Label(row1_frame, text="Select Ledger:", font=("Times", 15), bg="lightblue").pack(side="left", padx=10)
+    tk.Radiobutton(row1_frame, text="Nil Bal", bg="lightblue", font=("Times", 15)).pack(side="left", padx=5)
+    tk.Radiobutton(row1_frame, text="Only Bal", bg="lightblue", font=("Times", 15)).pack(side="left", padx=5)
+    tk.Radiobutton(row1_frame, text="Both", bg="lightblue", font=("Times", 15)).pack(side="left", padx=5)
 
-    balance_var = tk.StringVar(value="Nil Bal")
-    balance_options = ["Nil Bal", "Only Bal", "Both"]
-    for i, option in enumerate(balance_options):
-        tk.Radiobutton(
-            options_frame, text=option, value=option,
-            variable=balance_var, font=("Arial", 10), bg="lightblue"
-        ).grid(row=0, column=i + 1, padx=10)
+    # Select Account (Row 2)
+    row2_frame = tk.Frame(content_frame, bg="lightblue")
+    row2_frame.pack(fill='x', pady=10)
+    tk.Label(row2_frame, text="Select Account:", font=("Times", 15), bg="lightblue").pack(side="left", padx=10)
+    tk.Radiobutton(row2_frame, text="All A/C", bg="lightblue", font=("Times", 15)).pack(side="left", padx=5)
+    tk.Radiobutton(row2_frame, text="Individual", bg="lightblue", font=("Times", 15)).pack(side="left", padx=5)
 
-    # Account options
-    tk.Label(
-        options_frame, text="Select Account:", font=("Arial", 12, "bold"), bg="lightblue"
-    ).grid(row=1, column=0, sticky="w", padx=10, pady=10)
+    # Main Ledger Combobox (Row 3)
+    row3_frame = tk.Frame(content_frame, bg="lightblue")
+    row3_frame.pack(fill='x', pady=10)
+    tk.Label(row3_frame, text="Main Ledger:", font=("Times", 15), bg="lightblue").pack(side="left", padx=10)
+    main_ledger_combobox = ttk.Combobox(row3_frame, font=("Times", 15), width=20)
+    main_ledger_combobox.pack(side="left", padx=10)
 
-    account_var = tk.StringVar(value="All A/C")
-    account_options = ["All A/C", "Individual"]
-    for i, option in enumerate(account_options):
-        tk.Radiobutton(
-            options_frame, text=option, value=option,
-            variable=account_var, font=("Arial", 10), bg="lightblue"
-        ).grid(row=1, column=i + 1, padx=10)
+    # Sub Ledger Combobox (Row 4)
+    row4_frame = tk.Frame(content_frame, bg="lightblue")
+    row4_frame.pack(fill='x', pady=10)
+    tk.Label(row4_frame, text="Sub Ledger:", font=("Times", 15), bg="lightblue").pack(side="left", padx=10)
+    sub_ledger_combobox = ttk.Combobox(row4_frame, font=("Times", 15), width=20)
+    sub_ledger_combobox.pack(side="left", padx=10)
 
-    # Stone options
-    tk.Label(
-        options_frame, text="Select Stone:", font=("Arial", 12, "bold"), bg="lightblue"
-    ).grid(row=2, column=0, sticky="w", padx=10, pady=10)
+    # From Date (Row 5)
+    row5_frame = tk.Frame(content_frame, bg="lightblue")
+    row5_frame.pack(fill='x', pady=10)
+    tk.Label(row5_frame, text="From Date:", font=("Times", 15), bg="lightblue").pack(side="left", padx=10)
+    from_date_entry = tk.Entry(row5_frame, font=("Times", 15), width=20)
+    from_date_entry.pack(side="left", padx=10)
 
-    stone_var = tk.StringVar(value="Without St")
-    stone_options = ["Without St", "With Stones", "Pcs/WO Touch", "Running"]
-    for i, option in enumerate(stone_options):
-        tk.Radiobutton(
-            options_frame, text=option, value=option,
-            variable=stone_var, font=("Arial", 10), bg="lightblue"
-        ).grid(row=2, column=i + 1, padx=10)
+    # To Date (Row 6)
+    row6_frame = tk.Frame(content_frame, bg="lightblue")
+    row6_frame.pack(fill='x', pady=10)
+    tk.Label(row6_frame, text="To Date:", font=("Times", 15), bg="lightblue").pack(side="left", padx=10)
+    to_date_entry = tk.Entry(row6_frame, font=("Times", 15), width=20)
+    to_date_entry.pack(side="left", padx=10)
 
-    # Balance type options
-    tk.Label(
-        options_frame, text="Select Balance:", font=("Arial", 12, "bold"), bg="lightblue"
-    ).grid(row=3, column=0, sticky="w", padx=10, pady=10)
+    # Buttons (Row 7)
+    row7_frame = tk.Frame(content_frame, bg="lightblue")
+    row7_frame.pack(fill='x', pady=20)
+    
+    tk.Button(row7_frame, text="Report", font=("Times", 15), bg="green", fg="white", width=10,
+              command=lambda: print(f"Generating report from {from_date_entry.get()} to {to_date_entry.get()}")).pack(side="left", padx=10)
+    
+    tk.Button(row7_frame, text="Cancel", font=("Times", 15), bg="orange", fg="white", width=10,
+              command=lambda: [from_date_entry.delete(0, tk.END), to_date_entry.delete(0, tk.END)]).pack(side="left", padx=10)
+    
+    tk.Button(row7_frame, text="Exit", font=("Times", 15), bg="red", fg="white", width=10,
+              command=party_ledger_window.destroy).pack(side="left", padx=10)
 
-    bal_var = tk.StringVar(value="With Opening Balance")
-    bal_options = ["With Opening Balance", "Without Opening Balance"]
-    for i, option in enumerate(bal_options):
-        tk.Radiobutton(
-            options_frame, text=option, value=option,
-            variable=bal_var, font=("Arial", 10), bg="lightblue"
-        ).grid(row=3, column=i + 1, padx=10)
-
-    # Date options
-    tk.Label(
-        options_frame, text="Select Date:", font=("Arial", 12, "bold"), bg="lightblue"
-    ).grid(row=4, column=0, sticky="w", padx=10, pady=10)
-
-    date_var = tk.StringVar(value="Monthly")
-    date_options = ["Monthly", "Date Wise", "BillWise"]
-    for i, option in enumerate(date_options):
-        tk.Radiobutton(
-            options_frame, text=option, value=option,
-            variable=date_var, font=("Arial", 10), bg="lightblue"
-        ).grid(row=4, column=i + 1, padx=10)
-
-    # Date Inputs
-    tk.Label(party_ledger_window, text="From Date:", font=("Arial", 14), bg="lightblue").grid(row=2, column=0, padx=10, pady=10)
-    from_date_entry = tk.Entry(party_ledger_window, font=("Arial", 14), width=20)
-    from_date_entry.grid(row=2, column=1)
-
-    tk.Label(party_ledger_window, text="To Date:", font=("Arial", 14), bg="lightblue").grid(row=3, column=0, padx=10, pady=10)
-    to_date_entry = tk.Entry(party_ledger_window, font=("Arial", 14), width=20)
-    to_date_entry.grid(row=3, column=1)
-
-    # Buttons
-    tk.Button(
-        party_ledger_window, text="Report", font=("Arial", 12), bg="green", fg="white",
-        width=10, command=lambda: print(f"Generating report from {from_date_entry.get()} to {to_date_entry.get()}")
-    ).grid(row=4, column=0, padx=10, pady=10)
-
-    tk.Button(
-        party_ledger_window, text="Cancel", font=("Arial", 12), bg="orange", fg="white",
-        width=10, command=lambda: [from_date_entry.delete(0, tk.END), to_date_entry.delete(0, tk.END)]
-    ).grid(row=4, column=1, padx=10, pady=10)
-
-    tk.Button(
-        party_ledger_window, text="Exit", font=("Arial", 12), bg="red", fg="white",
-        width=10, command=party_ledger_window.destroy
-    ).grid(row=4, column=2, padx=10, pady=10)
-###  party ledger page ended
+### party ledger page ended

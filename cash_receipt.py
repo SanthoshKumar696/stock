@@ -18,8 +18,8 @@ from day_book import day_book
 conn = sqlite3.connect('stock.db')
 cursor = conn.cursor()
 
-def exit_program(root):
-    root.destroy()
+# def exit_program(root):
+#     root.destroy()
 
 #this function is using Enter button cliking move the next column
 def focus_next_widget(event):
@@ -708,7 +708,7 @@ tk.Button(footer_frame, text="Delete", width=12, bg="red", fg="white", command=d
 tk.Button(footer_frame, text="Save", width=12, bg="blue", fg="white", command=save_items).grid(row=0, column=2, padx=10)
 correction_button=tk.Button(footer_frame, text="Correction", width=12, bg="purple", fg="white", command=correction_item)
 correction_button.grid(row=0,column=3, padx=10)
-tk.Button(footer_frame, text="Exit", width=12, bg="orange", fg="white", command=lambda:exit_program(root)).grid(row=0, column=4, padx=10)
+tk.Button(footer_frame, text="Exit", width=12, bg="orange", fg="white", command=root.destroy).grid(row=0, column=4, padx=10)
 
 # Run the application
 root.mainloop()

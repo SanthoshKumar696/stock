@@ -1,13 +1,12 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
-from datetime import datetime
 
 def open_sub_ledger(root):
     # Create a new window for Sub Ledger
     sub_ledger_window = tk.Toplevel()
     sub_ledger_window.title("Sub Ledger Master")
-
+    
     # Get screen dimensions to make window full size
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
@@ -17,24 +16,6 @@ def open_sub_ledger(root):
     # Database connection (assuming a database named 'stock.db')
     conn = sqlite3.connect("stock.db")
     cursor = conn.cursor()
-
-    # Create the sub_ledger table (if it doesn't already exist)
-    def create_sub_ledger_table():
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS sub_ledger (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                main_ledger TEXT NOT NULL,
-                name TEXT NOT NULL,
-                ob_rate_receipt REAL DEFAULT 0.0,
-                ob_rate_issue REAL DEFAULT 0.0,
-                ob_balance_receipt REAL DEFAULT 0.0,
-                ob_balance_issue REAL DEFAULT 0.0,
-                entry_date TEXT NOT NULL
-            );
-        """)
-        conn.commit()
-
-    create_sub_ledger_table()
 
     # Function to fetch Main Ledger values from the database
     def fetch_main_ledger():
@@ -51,8 +32,9 @@ def open_sub_ledger(root):
     name_var = tk.StringVar()
     ob_rate_var = tk.DoubleVar()
     ob_balance_var = tk.DoubleVar()
-    operation_variable_1 = tk.StringVar()  # For OB Rate (Receipt/Issue)
-    operation_variable_2 = tk.StringVar()  # For OB Balance (Receipt/Issue)
+    credit_days_var = tk.IntVar()
+    operation_variable_1 = tk.StringVar()  # For OB Rate
+    operation_variable_2 = tk.StringVar()  # For OB Balance
 
     # Function to move focus to the next widget when Enter is pressed
     def focus_next_widget(event):
@@ -91,7 +73,7 @@ def open_sub_ledger(root):
 
     # OB Balance Label and Entry
     tk.Label(main_frame, text="OB in Metal", font=("Times", 15), bg="lightblue").grid(row=4, column=0, padx=20, pady=10, sticky="w")
-    ob_balance_entry = tk.Entry(main_frame, width=20, justify="center", bd=4, font=("Times", 14), textvariable=ob_balance_var)
+    ob_balance_entry = tk.Entry(main_frame, width=20, justify="center", bd=4, font=("Times", 14), textvariable=ob_balance_var, bg="white")
     ob_balance_entry.grid(row=4, column=1, padx=10, pady=10, sticky="w")
     ob_balance_entry.bind("<Return>", focus_next_widget)
 
@@ -99,51 +81,52 @@ def open_sub_ledger(root):
     tk.Radiobutton(main_frame, text="Receipt", variable=operation_variable_2, value="Receipt", bg="lightblue", font=("Times", 15)).grid(row=4, column=2, padx=20, pady=10, sticky="w")
     tk.Radiobutton(main_frame, text="Issue", variable=operation_variable_2, value="Issue", bg="lightblue", font=("Times", 15)).grid(row=4, column=3, padx=20, pady=10, sticky="w")
 
+    
+    # Details Frame to show entered details
+    details_frame = tk.Frame(main_frame, bg="white", width=300, height=300)
+    details_frame.grid(row=1, column=5, rowspan=5, padx=20, pady=10, sticky="nsew")
+
+    # Function to display entered details in the details frame
+    def display_entered_details():
+        main_ledger = main_ledger_var.get()
+        name = name_var.get()
+        ob_rate = ob_rate_var.get()
+        ob_balance = ob_balance_var.get()
+        credit_days = credit_days_var.get()
+        operation_1 = operation_variable_1.get()
+        operation_2 = operation_variable_2.get()
+
+        # Clear previous details
+        for widget in details_frame.winfo_children():
+            widget.destroy()
+
+        # Display the new details
+        details_label = tk.Label(
+            details_frame,
+            text=f"Main Ledger: {main_ledger}\n"
+                 f"Name: {name}\n"
+                 f"OB in Rs: {ob_rate}\n"
+                 f"OB in Metal: {ob_balance}\n"
+                 f"Credit Days: {credit_days}\n"
+                 f"Operation (OB Rate): {operation_1}\n"
+                 f"Operation (OB Balance): {operation_2}",
+            font=("Arial", 12),
+            bg="lightgray",
+            justify="left"
+        )
+        details_label.pack(padx=10, pady=10)
+
     # Save Entry (insert into database)
     def save_entry():
         if main_ledger_var.get() and name_var.get():
             try:
-                # Prepare data for receipt/issue (rupees and metal)
-                entry_data = {
-                    "ob_rate_receipt": ob_rate_var.get() if operation_variable_1.get() == "Receipt" else 0.0,
-                    "ob_rate_issue": ob_rate_var.get() if operation_variable_1.get() == "Issue" else 0.0,
-                    "ob_balance_receipt": ob_balance_var.get() if operation_variable_2.get() == "Receipt" else 0.0,
-                    "ob_balance_issue": ob_balance_var.get() if operation_variable_2.get() == "Issue" else 0.0,
-                    "entry_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                }
-
-                # Check if the customer and the operation already exists
-                cursor.execute("""
-                    SELECT * FROM sub_ledger WHERE main_ledger = ? AND name = ?
-                """, (main_ledger_var.get(), name_var.get()))
-                existing_entry = cursor.fetchone()
-
-                if existing_entry:
-                    # If exists, update the respective columns based on Receipt/Issue operation
-                    cursor.execute("""
-                        UPDATE sub_ledger 
-                        SET ob_rate_receipt = ?, ob_rate_issue = ?, 
-                            ob_balance_receipt = ?, ob_balance_issue = ?, 
-                            entry_date = ?
-                        WHERE id = ?
-                    """, (entry_data["ob_rate_receipt"], entry_data["ob_rate_issue"],
-                          entry_data["ob_balance_receipt"], entry_data["ob_balance_issue"],
-                          entry_data["entry_date"], existing_entry[0]))
-                else:
-                    # If no existing entry, insert a new one
-                    cursor.execute("""
-                        INSERT INTO sub_ledger (main_ledger, name, 
-                                                ob_rate_receipt, ob_rate_issue, 
-                                                ob_balance_receipt, ob_balance_issue, 
-                                                entry_date)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """, (main_ledger_var.get(), name_var.get(), 
-                          entry_data["ob_rate_receipt"], entry_data["ob_rate_issue"],
-                          entry_data["ob_balance_receipt"], entry_data["ob_balance_issue"],
-                          entry_data["entry_date"]))
-
+                cursor.execute(""" 
+                    INSERT INTO sub_ledger (main_ledger, name, ob_rate, ob_balance, credit_days, operation_1, operation_2)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (main_ledger_var.get(), name_var.get(), ob_rate_var.get(), ob_balance_var.get(), credit_days_var.get(), operation_variable_1.get(), operation_variable_2.get()))
                 conn.commit()
                 messagebox.showinfo("Saved", "Details Saved Successfully!")
+                display_entered_details()
             except sqlite3.Error as e:
                 messagebox.showerror("Database Error", f"Error saving data: {e}")
         else:
@@ -151,7 +134,7 @@ def open_sub_ledger(root):
 
     # Button Frame for actions
     button_frame = tk.Frame(main_frame, bg="lightblue")
-    button_frame.grid(row=6, column=0, columnspan=5, pady=20)
+    button_frame.grid(row=6, column=0, columnspan=5, pady=20)  # Placing the button_frame after other components
 
     # Buttons
     save_button = tk.Button(
@@ -197,4 +180,3 @@ def open_sub_ledger(root):
         command=lambda: messagebox.showinfo("Name List", "Display the name list logic here.")
     )
     name_list_button.grid(row=0, column=3, pady=20, padx=10)
-
