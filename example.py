@@ -1,58 +1,48 @@
-import sqlite3
 import tkinter as tk
+from tkinter import ttk
 
-# Step 1: Fetch data from the database
-def fetch_data():
-    try:
-        # Connect to the database
-        conn = sqlite3.connect('stock.db')  # Make sure this path is correct
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM saved_data")  # Replace with your actual table name
-        data = cursor.fetchall()  # Fetch all data from the table
-        columns = [description[0] for description in cursor.description]  # Get column names
-        conn.close()
-        return columns, data
-    except sqlite3.Error as e:
-        print(f"Error fetching data: {e}")
-        return [], []
+# Create the main window
+root = tk.Tk()
+root.title("Jewelry Inventory Management System")
 
-# Step 2: Function to display data in a table-like format in Tkinter with borders
-def display_table():
-    columns, data = fetch_data()
+# Create a frame for the Treeview and Scrollbar with a specific size (fix width and height)
+frame = tk.Frame(root, width=800, height=400)  # Fixed size for the frame
+frame.pack_propagate(False)  # Prevent the frame from resizing to fit its content
+frame.pack(padx=10, pady=10)
 
-    if not columns or not data:  # If no data or columns, show an error
-        print("No data available or error fetching data.")
-        return
+# Create the Treeview widget with many columns
+columns = ("ID", "Name", "Price", "Quantity", "Category", "Material", "Color", "Size", "Weight", "Supplier")
+tree = ttk.Treeview(frame, columns=columns, show="headings")
 
-    # Step 3: Create Tkinter window
-    root = tk.Tk()
-    root.title("Client Data Table")
-    root.geometry("800x600")  # Set the window size
+# Set column headings
+for col in columns:
+    tree.heading(col, text=col)
 
-    # Step 4: Create header row (column names)
-    for col_num, column in enumerate(columns):
-        header_label = tk.Label(root, text=column, font=("Arial", 12, "bold"), relief="solid", width=20, anchor="w", bg="#f2f2f2")
-        header_label.grid(row=0, column=col_num, padx=5, pady=5, sticky="nsew")
+# Set column widths (you can adjust these based on your data)
+tree.column("ID", width=50)
+tree.column("Name", width=150)
+tree.column("Price", width=100)
+tree.column("Quantity", width=100)
+tree.column("Category", width=120)
+tree.column("Material", width=120)
+tree.column("Color", width=80)
+tree.column("Size", width=80)
+tree.column("Weight", width=100)
+tree.column("Supplier", width=150)
 
-    # Step 5: Create data rows with borders
-    for row_num, row in enumerate(data, start=1):
-        for col_num, item in enumerate(row):
-            row_label = tk.Label(root, text=item, font=("Arial", 12), relief="solid", width=20, anchor="w")
-            # Alternate row colors
-            if row_num % 2 == 0:
-                row_label.config(bg="#f9f9f9")
-            row_label.grid(row=row_num, column=col_num, padx=5, pady=5, sticky="nsew")
+# Insert some example items (you can add your actual inventory data here)
+tree.insert("", "end", values=("1", "Ring", "$100", "5", "Jewelry", "Gold", "Gold", "Medium", "50g", "Supplier A"))
+tree.insert("", "end", values=("2", "Necklace", "$200", "3", "Jewelry", "Silver", "Silver", "Large", "80g", "Supplier B"))
+tree.insert("", "end", values=("3", "Earrings", "$50", "8", "Jewelry", "Platinum", "Platinum", "Small", "30g", "Supplier C"))
+tree.insert("", "end", values=("4", "Bracelet", "$150", "2", "Jewelry", "Leather", "Brown", "Medium", "60g", "Supplier D"))
 
-    # Adjust window resizing behavior
-    for col_num in range(len(columns)):
-        root.grid_columnconfigure(col_num, weight=1)
+# Create a horizontal scrollbar linked to the Treeview
+h_scrollbar = ttk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+tree.configure(xscrollcommand=h_scrollbar.set)
+h_scrollbar.pack(side="bottom", fill="x")
 
-    # Make rows and columns resize with the window
-    for row_num in range(len(data) + 1):  # Add 1 for the header row
-        root.grid_rowconfigure(row_num, weight=1)
+# Pack the Treeview widget inside the frame (do not expand to fill)
+tree.pack(fill="both", expand=False)
 
-    # Start the Tkinter event loop
-    root.mainloop()
-
-# Step 7: Execute the table display function
-display_table()
+# Start the Tkinter event loop
+root.mainloop()

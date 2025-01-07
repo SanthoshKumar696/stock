@@ -1,183 +1,187 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import sqlite3
 
-def open_sub_ledger(root):  #### start the sub product 
-    # Create a new window for Main Ledger
+def open_sub_ledger(root):
+    # Create a new window for Sub Ledger
     sub_ledger_window = tk.Toplevel()
-    sub_ledger_window.title("Main Product Master")
+    sub_ledger_window.title("Sub Ledger Master")
+    
+    # Get screen dimensions to make window full size
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-
     sub_ledger_window.geometry(f"{screen_width}x{screen_height}")
     sub_ledger_window.configure(bg="lightblue")
 
-    # Variables for input fields
-    operation_var = tk.StringVar(value="Addition")  # Default radio button selection
-    main_ledger_var = tk.StringVar()  # Dropdown selection
-    code_var = tk.StringVar()
+    # Database connection (assuming a database named 'stock.db')
+    conn = sqlite3.connect("stock.db")
+    cursor = conn.cursor()
+
+    # Function to fetch Main Ledger values from the database
+    def fetch_main_ledger():
+        try:
+            cursor.execute("SELECT name FROM main_ledger")  # Assuming 'name' field exists in main_ledger table
+            result = cursor.fetchall()
+            return [row[0].upper() for row in result]  # Convert to uppercase for display
+        except sqlite3.Error as e:
+            messagebox.showerror("Database Error", f"Error fetching data: {e}")
+            return []
+
+    # Variables to hold the user input
+    main_ledger_var = tk.StringVar()
     name_var = tk.StringVar()
-    
+    ob_rate_var = tk.DoubleVar()
+    ob_balance_var = tk.DoubleVar()
+    credit_days_var = tk.IntVar()
+    operation_variable_1 = tk.StringVar()  # For OB Rate
+    operation_variable_2 = tk.StringVar()  # For OB Balance
 
-    # First Line: Radio Buttons for Operations
-    tk.Label(
-        sub_ledger_window,
-        text="Select Operation:",
-        font=("Arial", 12, "bold"),
-        bg="lightblue"
-    ).grid(row=0, column=0, sticky="w", padx=10, pady=10)
+    # Function to move focus to the next widget when Enter is pressed
+    def focus_next_widget(event):
+        """Move the focus to the next widget."""
+        event.widget.tk_focusNext().focus()
+        return "break"
 
-    operations = ["Addition", "Correction", "Deletion", "View"]
-    for i, operation in enumerate(operations):
-        tk.Radiobutton(
-            sub_ledger_window,
-            text=operation,
-            variable=operation_var,
-            value=operation,
-            font=("Arial", 10),
-            bg="lightblue"
-        ).grid(row=0, column=i + 1, padx=10)
+    # Frame to hold all widgets (for better organization)
+    main_frame = tk.Frame(sub_ledger_window, bg="lightblue")
+    main_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 
-    # Second Line: Main Ledger Dropdown
-    tk.Label(
-        sub_ledger_window,
-        text="Main Ledger:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=1, column=0, sticky="w", padx=10, pady=10)
+    # Label for Sub Ledger
+    tk.Label(main_frame, text="Sub Ledger", font=("Times", 25, "bold"), fg="green", bg="lightblue").grid(row=0, column=2, columnspan=2, pady=20)
 
-    main_ledger_options = ["Ledger 1", "Ledger 2", "Ledger 3"]  # Example options
-    main_ledger_dropdown = ttk.Combobox(
-        sub_ledger_window,
-        textvariable=main_ledger_var,
-        values=main_ledger_options,
-        state="readonly",
-        width=30
-    )
-    main_ledger_dropdown.grid(row=1, column=1, columnspan=3, padx=10, pady=10)
+    # Main Ledger Label and ComboBox
+    tk.Label(main_frame, text="Main Ledger", font=("Times", 15), bg="lightblue").grid(row=1, column=0, padx=20, pady=10, sticky="w")
+    main_ledger_combo = ttk.Combobox(main_frame, values=fetch_main_ledger(), state="readonly", justify="center", font=("Times", 14), textvariable=main_ledger_var)
+    main_ledger_combo.grid(row=1, column=1, padx=10, pady=10, sticky="w")
+    main_ledger_combo.bind("<Return>", focus_next_widget)
 
-    # Third Line: Code
-    tk.Label(
-        sub_ledger_window,
-        text="Code:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=2, column=0, sticky="w", padx=10, pady=10)
+    # Name Label and Entry
+    tk.Label(main_frame, text="Name", font=("Times", 14), bg="lightblue").grid(row=2, column=0, padx=20, pady=10, sticky="w")
+    name_entry = tk.Entry(main_frame, width=20, justify="center", bd=4, font=("Times", 14), textvariable=name_var)
+    name_entry.grid(row=2, column=1, padx=10, pady=10, sticky="w")
+    name_entry.bind("<Return>", focus_next_widget)
 
-    code_entry = tk.Entry(
-        sub_ledger_window,
-        textvariable=code_var,
-        font=("Arial", 12),
-        width=30
-    )
-    code_entry.grid(row=2, column=1, columnspan=3, padx=10, pady=10)
+    # OB Rate Label and Entry
+    tk.Label(main_frame, text="OB in Rs", font=("Times", 15), bg="lightblue").grid(row=3, column=0, padx=20, pady=10, sticky="w")
+    ob_rate_entry = tk.Entry(main_frame, width=20, justify="center", bd=4, font=("Times", 14), textvariable=ob_rate_var)
+    ob_rate_entry.grid(row=3, column=1, padx=10, pady=10, sticky="w")
+    ob_rate_entry.bind("<Return>", focus_next_widget)
 
-    # Fourth Line: Name
-    tk.Label(
-        sub_ledger_window,
-        text="Name:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=3, column=0, sticky="w", padx=10, pady=10)
+    # Radio Buttons for "Receipt/Issue" - OB Rate
+    tk.Radiobutton(main_frame, text="Receipt", variable=operation_variable_1, value="Receipt", bg="lightblue", font=("Times", 15)).grid(row=3, column=2, padx=20, pady=10, sticky="w")
+    tk.Radiobutton(main_frame, text="Issue", variable=operation_variable_1, value="Issue", bg="lightblue", font=("Times", 15)).grid(row=3, column=3, padx=20, pady=10, sticky="w")
 
-    name_entry = tk.Entry(
-        sub_ledger_window,
-        textvariable=name_var,
-        font=("Arial", 12),
-        width=30
-    )
-    name_entry.grid(row=3, column=1, columnspan=3, padx=10, pady=10)
+    # OB Balance Label and Entry
+    tk.Label(main_frame, text="OB in Metal", font=("Times", 15), bg="lightblue").grid(row=4, column=0, padx=20, pady=10, sticky="w")
+    ob_balance_entry = tk.Entry(main_frame, width=20, justify="center", bd=4, font=("Times", 14), textvariable=ob_balance_var, bg="white")
+    ob_balance_entry.grid(row=4, column=1, padx=10, pady=10, sticky="w")
+    ob_balance_entry.bind("<Return>", focus_next_widget)
 
+    # Radio Buttons for "Receipt/Issue" - OB Balance
+    tk.Radiobutton(main_frame, text="Receipt", variable=operation_variable_2, value="Receipt", bg="lightblue", font=("Times", 15)).grid(row=4, column=2, padx=20, pady=10, sticky="w")
+    tk.Radiobutton(main_frame, text="Issue", variable=operation_variable_2, value="Issue", bg="lightblue", font=("Times", 15)).grid(row=4, column=3, padx=20, pady=10, sticky="w")
 
-    # Right-side Frame to Show Entered Details
-    details_frame = tk.Frame(sub_ledger_window, bg="lightgray", width=400, height=300)
-    details_frame.grid(row=0, column=4, rowspan=7, padx=20, pady=10)
+    # Credit Days Label and Entry
+    tk.Label(main_frame, text="Credit Period No of Days", font=("Times", 15), bg="lightblue").grid(row=5, column=0, padx=20, pady=10, sticky="w")
+    credit_days_entry = tk.Entry(main_frame, width=20, justify="center", bd=4, font=("Times", 14), textvariable=credit_days_var)
+    credit_days_entry.grid(row=5, column=1, padx=10, pady=10, sticky="w")
+    credit_days_entry.bind("<Return>", focus_next_widget)
 
-    # Function to update and display entered details in the right-side box
+    # Details Frame to show entered details
+    details_frame = tk.Frame(main_frame, bg="white", width=300, height=300)
+    details_frame.grid(row=1, column=5, rowspan=5, padx=20, pady=10, sticky="nsew")
+
+    # Function to display entered details in the details frame
     def display_entered_details():
-        # Get the entered values
-        operation = operation_var.get()
         main_ledger = main_ledger_var.get()
-        code = code_var.get()
         name = name_var.get()
-        
+        ob_rate = ob_rate_var.get()
+        ob_balance = ob_balance_var.get()
+        credit_days = credit_days_var.get()
+        operation_1 = operation_variable_1.get()
+        operation_2 = operation_variable_2.get()
 
         # Clear previous details
         for widget in details_frame.winfo_children():
             widget.destroy()
 
-        # Display the new details in a label
+        # Display the new details
         details_label = tk.Label(
             details_frame,
-            text=f"Operation: {operation}\n"
-                 f"Main Ledger: {main_ledger}\n"
-                 f"Code: {code}\n"
-                 f"Name: {name}\n",
+            text=f"Main Ledger: {main_ledger}\n"
+                 f"Name: {name}\n"
+                 f"OB in Rs: {ob_rate}\n"
+                 f"OB in Metal: {ob_balance}\n"
+                 f"Credit Days: {credit_days}\n"
+                 f"Operation (OB Rate): {operation_1}\n"
+                 f"Operation (OB Balance): {operation_2}",
             font=("Arial", 12),
             bg="lightgray",
             justify="left"
         )
         details_label.pack(padx=10, pady=10)
 
-    # Button Actions
+    # Save Entry (insert into database)
     def save_entry():
-        if (
-            operation_var.get() and
-            main_ledger_var.get() and
-            code_var.get() and
-            name_var.get() 
-        ):
-            messagebox.showinfo("Saved", "Details Saved Successfully!")
-            display_entered_details()
+        if main_ledger_var.get() and name_var.get():
+            try:
+                cursor.execute(""" 
+                    INSERT INTO sub_ledger (main_ledger, name, ob_rate, ob_balance, credit_days, operation_1, operation_2)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, (main_ledger_var.get(), name_var.get(), ob_rate_var.get(), ob_balance_var.get(), credit_days_var.get(), operation_variable_1.get(), operation_variable_2.get()))
+                conn.commit()
+                messagebox.showinfo("Saved", "Details Saved Successfully!")
+                display_entered_details()
+            except sqlite3.Error as e:
+                messagebox.showerror("Database Error", f"Error saving data: {e}")
         else:
             messagebox.showwarning("Missing Fields", "Please fill all the fields!")
 
-    def cancel_entry():
-        # Clear all fields
-        operation_var.set("Addition")
-        main_ledger_var.set("")
-        code_var.set("")
-        name_var.set("")
-        
+    # Button Frame for actions
+    button_frame = tk.Frame(main_frame, bg="lightblue")
+    button_frame.grid(row=6, column=0, columnspan=5, pady=20)  # Placing the button_frame after other components
 
     # Buttons
-    tk.Button(
-        sub_ledger_window,
+    save_button = tk.Button(
+        button_frame,
         text="Save",
         font=("Arial", 12),
         bg="green",
         fg="white",
         width=10,
         command=save_entry
-    ).grid(row=6, column=0, pady=20)
+    )
+    save_button.grid(row=0, column=0, pady=20, padx=10)
 
-    tk.Button(
-        sub_ledger_window,
-        text="Cancel",
+    correction_button = tk.Button(
+        button_frame,
+        text="Correction",
         font=("Arial", 12),
         bg="orange",
         fg="white",
         width=10,
-        command=cancel_entry
-    ).grid(row=6, column=1, pady=20)
+        command=lambda: messagebox.showinfo("Correction", "Correction logic to be implemented.")
+    )
+    correction_button.grid(row=0, column=1, pady=20, padx=10)
 
-    tk.Button(
-        sub_ledger_window,
+    exit_button = tk.Button(
+        button_frame,
         text="Exit",
         font=("Arial", 12),
         bg="red",
         fg="white",
         width=10,
         command=sub_ledger_window.destroy
-    ).grid(row=6, column=2, pady=20)
+    )
+    exit_button.grid(row=0, column=2, pady=20, padx=10)
 
-    tk.Button(
-        sub_ledger_window,
+    name_list_button = tk.Button(
+        button_frame,
         text="Name List",
         font=("Arial", 12),
         bg="blue",
         fg="white",
         width=10,
         command=lambda: messagebox.showinfo("Name List", "Display the name list logic here.")
-    ).grid(row=6, column=3, pady=20)
-    ##### end the sub product ended 
-### sub product master page ended
+    )
+    name_list_button.grid(row=0, column=3, pady=20, padx=10)

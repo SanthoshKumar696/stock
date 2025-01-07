@@ -18,6 +18,9 @@ from day_book import day_book
 conn = sqlite3.connect('stock.db')
 cursor = conn.cursor()
 
+def exit_program(root):
+    root.destroy()
+
 #this function is using Enter button cliking move the next column
 def focus_next_widget(event):
     """Move the focus to the next widget."""
@@ -105,25 +108,75 @@ def calculate_net_wt(event=None):  # 'event' is needed for binding
         messagebox.showerror("Input Error", "Please enter valid numbers for Gross Wt, Stones, and Touch.")
 # Bind the Enter key to the Touch entry field
 
-# Function to calculate MC
+
 def calculate_mc(event=None):
     try:
-        mc_at = float(mc_at_entry.get()) if mc_at_entry.get() else 0.0  # Corrected line: Use .get() to retrieve value
-        net_wt = float(net_wt_entry.get()) if net_wt_entry.get() else 0.0  # Corrected line: Use .get() to retrieve value
+        # Get the net weight and mc_at values
+        net_wt = float(net_wt_entry.get()) if net_wt_entry.get() else 0.0  # Default to 0.0 if empty
+        mc_at = float(mc_at_entry.get()) if mc_at_entry.get() else 0.0  # Default to 0.0 if empty
 
-        mc = net_wt * mc_at  # MC calculation
+        # MC calculation: multiply net weight with mc_at
+        mc = net_wt * mc_at
 
-        mc_entry.delete(0, tk.END)  # Clear existing value
-        mc_entry.insert(0, f"{mc:.2f}")  # Insert calculated value with 2 decimal places
+        # Display the result in mc_entry with 2 decimal places
+        mc_entry.delete(0, tk.END)
+        mc_entry.insert(0, f"{mc:.2f}")
 
-        focus_next_widget(event)  # Move focus to next widget or column
+        # Optionally, move focus to the next widget
+        focus_next_widget(event)
 
     except ValueError:
+        # Show error message if invalid input is provided
         messagebox.showerror("Input Error", "Please enter valid numbers for MC@ and Net Wt.")
 
 
+
+def display_mc_at_value(event=None):
+    # Check if mc_at_entry is empty before fetching from the database
+    if not mc_at_entry.get():  # Only fetch if the field is empty
+        main_product = main_product_combo.get()
+        sub_product = sub_product_combo.get()
+
+        # Fetch mc_at value from the database
+        cursor.execute("SELECT mc_at FROM opening_stock WHERE main_product=? AND sub_product=?", 
+                       (main_product, sub_product))
+        result = cursor.fetchone()
+
+        if result:
+            mc_at = result[0]  # Extract mc_at value from the result
+        else:
+            mc_at = 0.0  # Default value if no result is found
+
+        # Display mc_at value in mc_at_entry with 1 decimal place
+        mc_at_entry.delete(0, tk.END)  # Clear any existing value
+        mc_at_entry.insert(0, f"{mc_at:.1f}")
+
+    # Optionally, move focus to the next widget
+    focus_next_widget(event)
+    # Get selected values from combo boxes
+   
+def fetch_rate_value(event=None):
+    if not rate_entry.get():
+        main_product=main_product_combo.get()
+        sub_product=sub_product_combo.get()
+
+        cursor.execute("SELECT rate FROM opening_stock WHERE main_product=? AND sub_product=?",
+                       (main_product, sub_product))
+        result=cursor.fetchone()
+
+        if result:
+            rate=result[0]
+        else:
+            rate=0.0
+
+        rate_entry.delete(0, tk.END)
+        rate_entry.insert(0, f"{rate:.2f}")
+
+    focus_next_widget(event)
+
 # Function to calculate Amount 
 def calculate_amount(event=None):
+    
     rate=float(rate_entry.get()) if rate_entry.get() else 0.0
     net_wt=float(net_wt_entry.get()) if net_wt_entry.get() else 0.0
     mc=float(mc_entry.get()) if mc_entry.get() else 0.0
@@ -131,10 +184,46 @@ def calculate_amount(event=None):
     amount=(net_wt*rate)+mc # final amount calculation 
 
     amount_entry.delete(0, tk.END)
-    amount_entry.insert(0,f"{amount:.2f}")
+    amount_entry.insert(0, f"{amount:.2f}")
 
     focus_next_widget(event)
     ############################################################
+
+###########################################################################################
+
+def fetch_rate(main_product, sub_product):
+    # Fetch the rate from the database based on main_product and sub_product
+    
+    cursor.execute("SELECT rate FROM opening_stock WHERE main_product=? AND sub_product=?", (main_product, sub_product))
+    result = cursor.fetchone()  # Fetch one result
+    conn.commit()
+    
+    if result:
+        return result[0]  # Return the rate from the first column
+    else:
+        return 0.0  # Default rate if no result is found
+
+def update_rate_entry(event=None):
+    # Get the selected main_product and sub_product
+    main_product = main_product_combo.get()
+    sub_product = sub_product_combo.get()
+    
+    # Fetch the rate from the database based on the selected products
+    cursor.execute("SELECT rate from opening_stock WHERE main_product=? AND sub_product=?", (main_product, sub_product))
+    result=cursor.fetchone()
+
+    if result:
+        rate=result[0]
+    else:
+        rate = 0
+    
+    # Populate the rate_entry with the fetched rate
+    rate_entry.delete(0, tk.END)
+    rate_entry.insert(0, f"{rate:.2f}") 
+
+    focus_next_widget(event)
+
+###############################################################################
 
 # Functionality for buttons
 def add_item(event=None):
@@ -168,6 +257,7 @@ def add_item(event=None):
         messagebox.error("Input Error", "Please enter Rate")
         return 
     amount=(net_wt*rate)+float(mc)
+    amount=float(f"{amount:.2f}")
 
     if name and transaction :
         tree.insert("", "end", values=(sl_no, date, name, main_product, sub_product, transaction, gross_wt, stones, touch,net_wt, mc_at, mc, rate, amount, narration))
@@ -177,7 +267,8 @@ def add_item(event=None):
         messagebox.showerror("Input Error", "Please fill all required fields.")
 
     try:
-        amount = float(amount)
+        amount = float(f"{amount:.2f}")
+        
         cursor.execute("""
         INSERT INTO saved_data (date, "transaction", name, main_product, sub_product, gross_wt, stones, touch, net_wt, mc_at, mc, rate, amount, narration)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -199,8 +290,50 @@ def add_item(event=None):
     except sqlite3.Error as e:
         messagebox.showerror("Database Error", f"Error: {e}")
 
-    
 
+    # if transaction=="Metal Receipt":
+    #     Metaling_Label=tk.Label(root, text="Melting", font=("Arial", 12, "bold"), bg="lightpink")
+    #     Metaling_Label.grid(row=4, column=2, height=20, width=40)
+    #     Metaling_Entry=tk.Entry(root, padx=10, width=8, font=("Arial", 12, "bold"))
+    #     Metaling_Entry.grid(stciky="w", row=4, column=3)
+
+#         if True:
+#             cursor.execute("""
+#             UPDATE SET saved_data date=?, name=? WHERE id=?,(date,name, id)
+# """)
+    
+#     elif transaction=="Metal Issue":
+#         Metaling_issue_Label=tk.Label(root, text="Melting", font=("Arial", 12, "bold"), bg="lightpink")
+#         Metaling_issue_Label.grid(row=4, column=2, height=20, width=40)
+#         Metaling_issue_Entry=tk.Entry(root, padx=10, width=8, font=("Arial", 12, "bold"))
+#         Metaling_issue_Entry.grid(stciky="w", row=4, column=3)
+
+#         if True:
+#             cursor.execute("""
+
+#             UPDATE SET saved_data date=?, name=? WHERE id=?,(date,name,id)
+# """)
+    
+#     elif transaction=="Cash Receipt":
+#         Cash_Receipt=tk.Label(root, text="cash Receipt", font=("Arial", 12, "Strong"), bg="lightblue")
+    #     Cash_Receipt.grid(row=4, column=5, width=10)
+    #     Cash_Receipt_Entry=tk.Label(root, width=8, bd=2)
+    #     Cash_Receipt_Entry.grid(row=4, column=5)
+
+    #     if True:
+    #         cursor.execute("""
+    #             UPDATE SET customer_summary amount=amount-? WHERE id=?,(amount, id,)    """)
+            
+    # elif transaction=="Cash Payment":
+    #     Cash_Payment=tk.Label(root, text="cash payment")
+    #     Cash_Payment.grid(row=4, column=7)
+    #     Cash_Payment_Entry=tk.Entry(root, width=8, bd=3)
+    #     Cash_Payment_Entry.grid(row=3, column=8)
+
+    #     if True:
+    #         cursor.execute("""UPDATE SET customer_summary amount=amount+? WHERE""")
+
+#########################################################################################################################
 # Function to delete an item from the treeview and database
 def delete_item():
     selected_item = tree.selection()  # Get the selected item from TreeView
@@ -399,20 +532,6 @@ cash_receipt_label = tk.Label(root, text="Cash Receipt", font=("Times", 25, "bol
 cash_receipt_label.pack(pady=10)
 #############################################################################################################################
 
-# left_container = tk.Frame(root, bg="lightpink", width=screen_width)
-# left_container.pack( fill="y", padx=10, pady=10)
-
-# # Add a frame for the radio buttons
-# radio_frame = tk.Frame(left_container, bg="lightpink", bd=2, relief="solid", padx=10, pady=5)
-# radio_frame.pack(pady=5)
-
-# # Radio buttons for Add, Correct, Delete
-# operation_var = tk.StringVar(value="Add")
-# tk.Radiobutton(radio_frame, text="Add", variable=operation_var, value="Add", bg="lightpink", font=("Times", 14)).pack(side="left", padx=10)
-# tk.Radiobutton(radio_frame, text="Correction", variable=operation_var, value="Correction", bg="lightpink", font=("Times", 14)).pack(side="left", padx=10)
-# tk.Radiobutton(radio_frame, text="Delete", variable=operation_var, value="Delete", bg="lightpink", font=("Times", 14)).pack(side="left", padx=10)
-#################################################################################################################################################
-
 
 # Top Frame - Row 1: Basic Details
 # Top Frame - Line 1: Date, Transaction, Party Name
@@ -420,13 +539,13 @@ top_frame = tk.Frame(root, bg="lightpink")
 top_frame.pack(pady=10)
 
 # Row 1
-tk.Label(top_frame, text="Date", bg="lightpink", font=("Times", 15), anchor="w").grid(row=0, column=0, padx=5, sticky="w")
+tk.Label(top_frame, text="Date", bg="lightpink", font=("Times", 15), anchor="w").grid(row=0, column=0, padx=5)
 date_entry = tk.Entry(top_frame, width=15, justify="center", font=("Times",14), bd=4)
 date_entry.insert(0, datetime.now().strftime("%d-%m-%Y"))
 date_entry.grid(row=1, column=0, padx=5, sticky="w")
 date_entry.bind("<Return>", focus_next_widget)
 
-tk.Label(top_frame, text="Transaction", bg="lightpink", font=("Times", 15)).grid(row=0, column=1, padx=5, sticky="w")
+tk.Label(top_frame, text="Transaction", bg="lightpink", font=("Times", 15)).grid(row=0, column=1, padx=5)
 transaction_combo = ttk.Combobox(top_frame, values=["Cash Receipt", "Cash Payment", "Purchase", "Purchase Return", "Sales", "Sales Return", "Metal Receipt", "Metal Issue", "Rate Cut Sales", "Rate Cut Purchase", "Achari Receipt", "Achari Issue", "Approval Issue", "Approval Receipt"], width=15, justify="center", font=("Times",14))
 transaction_combo.grid(row=1, column=1, padx=5, sticky="w")
 transaction_combo.bind("<Return>", focus_next_widget)
@@ -439,7 +558,7 @@ def update_label(event):
 # Bind the selection event to the function
 transaction_combo.bind("<<ComboboxSelected>>", update_label)
 
-tk.Label(top_frame, text="Party Name", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=5, sticky="w")
+tk.Label(top_frame, text="Party Name", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=5)
 party_entry = tk.Entry(top_frame, width=20, justify="center", font=("Times",14), bd=4)
 party_entry.grid(row=1, column=2, padx=5, sticky="w")
 party_entry.bind("<Return>", focus_next_widget)
@@ -448,70 +567,82 @@ party_entry.bind("<Return>", focus_next_widget)
 middle_frame = tk.Frame(root, bg="lightpink")
 middle_frame.pack(pady=10)
 
-tk.Label(middle_frame, text="Main Product", bg="lightpink", font=("Times", 15)).grid(row=0, column=0, padx=5, sticky="w")
+tk.Label(middle_frame, text="Main Product", bg="lightpink", font=("Times", 15)).grid(row=0, column=0, padx=5)
 main_product_combo = ttk.Combobox(middle_frame, values=fetch_main_product(), state="readonly", width=20, justify="center", font=("Times",14))
 main_product_combo.grid(row=1, column=0, padx=5, sticky="w")
 main_product_combo.bind('<<ComboboxSelected>>',update_sub_products)
 main_product_combo.bind("<Return>", focus_next_widget)
 
-tk.Label(middle_frame, text="Design", bg="lightpink", font=("Times", 15)).grid(row=0, column=1, padx=5, sticky="w")
+tk.Label(middle_frame, text="Design", bg="lightpink", font=("Times", 15)).grid(row=0, column=1, padx=5)
 sub_product_combo = ttk.Combobox(middle_frame, state="readonly", width=20, justify="center", font=("Times",14))
 sub_product_combo.grid(row=1, column=1, padx=5, sticky="w")
 sub_product_combo.bind("<Return>", focus_next_widget)
 
-tk.Label(middle_frame, text="Gross Wt", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=5, sticky="w")
+tk.Label(middle_frame, text="Gross Wt", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=5)
 gross_wt_entry = tk.Entry(middle_frame, width=8, justify="center", font=("Times",14), bd=4)
 gross_wt_entry.grid(row=1, column=2, padx=5, sticky="w")
 gross_wt_entry.bind("<Return>", focus_next_widget)
 
-tk.Label(middle_frame, text="Stones", bg="lightpink", font=("Times", 15)).grid(row=0, column=3, padx=5, sticky="w")
+tk.Label(middle_frame, text="Cover", bg="lightpink", font=("Times", 15)).grid(row=0, column=3, padx=5)
 stones_entry = tk.Entry(middle_frame, width=7, justify="center", font=("Times",14), bd=4)
 stones_entry.grid(row=1, column=3, padx=5, sticky="w")
 stones_entry.bind("<Return>", focus_next_widget)
 
-tk.Label(middle_frame, text="Touch", bg="lightpink", font=("Times", 15)).grid(row=0, column=4, padx=5, sticky="w")
+tk.Label(middle_frame, text="Touch", bg="lightpink", font=("Times", 15)).grid(row=0, column=4, padx=5)
 touch_entry = tk.Entry(middle_frame, width=8, justify="center", font=("Times",14), bd=4)
 touch_entry.grid(row=1, column=4, padx=5, sticky="w")
 touch_entry.bind("<Return>", calculate_net_wt)
 
 
-tk.Label(middle_frame, text="Net Wt", bg="lightpink", font=("Times", 15)).grid(row=0, column=5, padx=5, sticky="w")
+tk.Label(middle_frame, text="Net Wt", bg="lightpink", font=("Times", 15)).grid(row=0, column=5, padx=5)
 net_wt_entry = tk.Entry(middle_frame, width=10, justify="center", font=("Times",14), bd=4)
 net_wt_entry.grid(row=1, column=5, padx=5, sticky="w")
 net_wt_entry.bind("<Return>", focus_next_widget)
 
-tk.Label(middle_frame, text="MC@", bg="lightpink", font=("Times", 15)).grid(row=0, column=6, padx=5, sticky="w")
+
+tk.Label(middle_frame, text="MC@", bg="lightpink", font=("Times", 15)).grid(row=0, column=6, padx=5)
 mc_at_entry = tk.Entry(middle_frame, width=7, justify="center", font=("Times",14), bd=4)
 mc_at_entry.grid(row=1, column=6, padx=5, sticky="w")
-mc_at_entry.bind("<Return>", calculate_mc)
+mc_at_entry.bind("<Return>", display_mc_at_value)
 
-tk.Label(middle_frame, text="MC", bg="lightpink", font=("Times", 15)).grid(row=0, column=7, padx=5, sticky="w")
+
+tk.Label(middle_frame, text="MC", bg="lightpink", font=("Times", 15)).grid(row=0, column=7, padx=5)
 mc_entry = tk.Entry(middle_frame, width=8, justify="center", font=("Times",14), bd=4)
 mc_entry.grid(row=1, column=7, padx=5, sticky="w")
-mc_entry.bind("<Return>", focus_next_widget)
+mc_entry.bind("<Return>", calculate_mc)
 
 # Bottom Frame - Line 3: Rate, Amount, Narration
 bottom_frame = tk.Frame(root, bg="lightpink")
 bottom_frame.pack(pady=10)
 
-tk.Label(bottom_frame, text="Rate", bg="lightpink", font=("Times", 15)).grid(row=0, column=0, padx=5, sticky="w")
+tk.Label(bottom_frame, text="Rate", bg="lightpink", font=("Times", 15)).grid(row=0, column=0, padx=5)
 rate_entry = tk.Entry(bottom_frame, width=10, justify="center", font=("Times",14), bd=4)
 rate_entry.grid(row=1, column=0, padx=5, sticky="w")
-rate_entry.bind("<Return>", calculate_amount)
+rate_entry.bind("<Return>", fetch_rate_value)
 
-tk.Label(bottom_frame, text="Amount", bg="lightpink", font=("Times", 15)).grid(row=0, column=1, padx=5, sticky="w")
+tk.Label(bottom_frame, text="Amount", bg="lightpink", font=("Times", 15)).grid(row=0, column=1, padx=5)
 amount_entry = tk.Entry(bottom_frame, width=11, justify="center", font=("Times",14), bd=4)
 amount_entry.grid(row=1, column=1, padx=5, sticky="w")
-amount_entry.bind("<Return>", focus_next_widget)
+amount_entry.bind("<Return>", calculate_amount)
 
-tk.Label(bottom_frame, text="Narration", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=5, sticky="w")
+########## the Metal Value or label and entry show or hide ###########
+# amount_value=amount_entry.get()
+
+# if amount_value== "" or 0 or 0.0:
+#     tk.Label(bottom_frame, text="Metal", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=5)
+#     metal_entry = tk.Entry(bottom_frame, width=11, justify="center", font=("Times",14), bd=4)
+#     metal_entry.grid(row=1, column=2, padx=5, sticky="w")
+#     metal_entry.bind("<Return>", focus_next_widget)
+
+tk.Label(bottom_frame, text="Narration", bg="lightpink", font=("Times", 15)).grid(row=0, column=3, columnspan=3,padx=5)
 narration_entry = tk.Entry(bottom_frame, width=30, justify="center", font=("Times",14), bd=4)
-narration_entry.grid(row=1, column=2, padx=5, columnspan=3, sticky="w")
+narration_entry.grid(row=1, column=3, padx=5, columnspan=3, sticky="w")
 narration_entry.bind("<Return>", add_item)
 
 
 # Frame for the Treeview and Scrollbars
-tree_frame = tk.Frame(root, bg="lightpink", width=600, height=800)
+tree_frame = tk.Frame(root, bg="lightpink", width=300, height=800)
+tree_frame.pack_propagate(False)  # Prevent the frame from resizing to fit its content
 tree_frame.pack(pady=10)
 
 # Create the Treeview widget
@@ -577,6 +708,7 @@ tk.Button(footer_frame, text="Delete", width=12, bg="red", fg="white", command=d
 tk.Button(footer_frame, text="Save", width=12, bg="blue", fg="white", command=save_items).grid(row=0, column=2, padx=10)
 correction_button=tk.Button(footer_frame, text="Correction", width=12, bg="purple", fg="white", command=correction_item)
 correction_button.grid(row=0,column=3, padx=10)
+tk.Button(footer_frame, text="Exit", width=12, bg="orange", fg="white", command=lambda:exit_program(root)).grid(row=0, column=4, padx=10)
 
 # Run the application
 root.mainloop()

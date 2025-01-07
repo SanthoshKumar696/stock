@@ -9,21 +9,31 @@ def connect_database():
     cursor = conn.cursor()
     return conn, cursor
 
-# Function to fetch transactions between two dates
+# Focus next widget function to move to the next entry field
+def focus_next_widget(event):
+    """ Move to the Next Widget """
+    event.widget.tk_focusNext().focus()
+
 def fetch_transactions(cursor, from_date, to_date):
     try:
-        # Convert input dates to the correct format
-        from_date_obj = datetime.strptime(from_date, "%d-%m-%Y").strftime("%Y-%m-%d")
-        to_date_obj = datetime.strptime(to_date, "%d-%m-%Y").strftime("%Y-%m-%d")
+        # Convert the dates to a format SQLite compares more easily (YYYY-MM-DD)
+        from_date = datetime.strptime(from_date, "%d-%m-%Y").strftime("%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%d-%m-%Y").strftime("%Y-%m-%d")
 
+        print(f"Fetching transactions from {from_date} to {to_date}")
+
+        # Execute query using the dates in the correct format
         cursor.execute(
             "SELECT * FROM saved_data WHERE date BETWEEN ? AND ? ORDER BY date",
-            (from_date, to_date)
+            (from_date, to_date)  # Use the dates directly in the correct format
         )
         rows = cursor.fetchall()
+
+        print(f"Transactions fetched: {rows}")
+
         return rows
-    except ValueError:
-        messagebox.showerror("Date Error", "Invalid date format! Use DD-MM-YYYY.")
+    except ValueError as e:
+        messagebox.showerror("Date Error", f"Invalid date format! Use DD-MM-YYYY. Error: {e}")
         return []
 
 # Function to display the day book window
@@ -35,7 +45,7 @@ def day_book(root):
     day_book_window.title("Day Book")
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
-    day_book_window.geometry(f"{screen_width}x{screen_height}")
+    day_book_window.geometry(f"{screen_width}x{screen_height}")  # Correct geometry format
     day_book_window.configure(bg="lightblue")
 
     # Function to generate and show the report
@@ -51,6 +61,8 @@ def day_book(root):
         if transactions:
             report_window = tk.Toplevel(day_book_window)
             report_window.title("Transaction Report")
+            
+            report_window.configure(bg="lightblue")
 
             # Define TreeView columns
             columns = (
@@ -62,7 +74,7 @@ def day_book(root):
                 tree.heading(col, text=col)
                 tree.column(col, width=1)
 
-            # Insert data into the TreeView
+            # Insert data into the TreeView (dates are already in DD-MM-YYYY)
             for row in transactions:
                 tree.insert("", tk.END, values=row)
 
@@ -84,11 +96,12 @@ def day_book(root):
     input_frame.pack(pady=10)
 
     tk.Label(input_frame, text="From Date (DD-MM-YYYY):", bg="lightblue", font=("Arial", 14)).grid(row=0, column=0, padx=10, pady=5)
-    from_date_entry = tk.Entry(input_frame, font=("Arial", 14), width=15)
+    from_date_entry = tk.Entry(input_frame, font=("Arial", 14), width=15, bd=3)
     from_date_entry.grid(row=0, column=1)
+    from_date_entry.bind('<Return>', focus_next_widget)
 
     tk.Label(input_frame, text="To Date (DD-MM-YYYY):", bg="lightblue", font=("Arial", 14)).grid(row=1, column=0, padx=10, pady=5)
-    to_date_entry = tk.Entry(input_frame, font=("Arial", 14), width=15)
+    to_date_entry = tk.Entry(input_frame, font=("Arial", 14), width=15, bd=3)
     to_date_entry.grid(row=1, column=1)
 
     # Buttons
@@ -100,4 +113,3 @@ def day_book(root):
               command=lambda: [from_date_entry.delete(0, tk.END), to_date_entry.delete(0, tk.END)]).grid(row=0, column=1, padx=10)
     tk.Button(button_frame, text="Exit", bg="red", fg="white", font=("Arial", 12), command=day_book_window.destroy).grid(row=0, column=2, padx=10)
 
-    

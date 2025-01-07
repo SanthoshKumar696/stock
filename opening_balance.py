@@ -1,234 +1,172 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from datetime import datetime
+import sqlite3
 
-def opening_balance(root):  ### start the opening balance  
-    opening_stock_window = tk.Toplevel()
-    opening_stock_window.title("Opening Balance")
+conn = sqlite3.connect('stock.db')
+cursor = conn.cursor()
+
+
+def opening_balance(root):  # Start the opening balance
+    opening_balance_window = tk.Toplevel()
+    opening_balance_window.title("Party Opening Balance")
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
 
-    opening_stock_window.geometry(f"{screen_width}x{screen_height}")
-    opening_stock_window.configure(bg="lightblue")
+    opening_balance_window.geometry(f"{screen_width}x{screen_height}")
+    opening_balance_window.configure(bg="lightblue")
 
-    # Variables for input fields
-    operation_var = tk.StringVar(value="Correction")  # Default radio button selection
-    main_product_var = tk.StringVar()  # Dropdown selection
-    sub_product_var = tk.StringVar()  # Dropdown selection
-    pcs_var = tk.StringVar()
-    gross_wt_var = tk.StringVar()
-    melting_var = tk.StringVar()
-    net_wt_var = tk.StringVar()
-    rate_var = tk.StringVar()
-    mc_var = tk.StringVar()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS customer_summary(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            DATE TEXT NOT NULL,
+            MAIN_LEDGER_NAME TEXT NOT NULL,
+            SUB_LEDGER_NAME TEXT NOT NULL,
+            WEIGHT REAL NULL,
+            AMOUNT REAL NULL)
+    """)
 
-    # First Line: Radio Buttons for Operations
-    tk.Label(
-        opening_stock_window,
-        text="Select Operation:",
-        font=("Arial", 12, "bold"),
-        bg="lightblue"
-    ).grid(row=0, column=0, sticky="w", padx=10, pady=10)
+    def focus_next_widget(event):
+        """Move the focus to the next widget"""
+        event.widget.tk_focusNext().focus()
+        return "break"
 
-    operations = ["Correction", "Deletion", "View"]
-    for i, operation in enumerate(operations):
-        tk.Radiobutton(
-            opening_stock_window,
-            text=operation,
-            variable=operation_var,
-            value=operation,
-            font=("Arial", 10),
-            bg="lightblue"
-        ).grid(row=0, column=i + 1, padx=10)
-
-    # Second Line: Main Product Dropdown
-    tk.Label(
-        opening_stock_window,
-        text="Main Product:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=1, column=0, sticky="w", padx=10, pady=10)
-
-    main_product_options = ["Product 1", "Product 2", "Product 3"]  # Example options
-    main_product_dropdown = ttk.Combobox(
-        opening_stock_window,
-        textvariable=main_product_var,
-        values=main_product_options,
-        state="readonly",
-        width=30
-    )
-    main_product_dropdown.grid(row=1, column=1, columnspan=3, padx=10, pady=10)
-
-    # Third Line: Sub Product Dropdown
-    tk.Label(
-        opening_stock_window,
-        text="Sub Product:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=2, column=0, sticky="w", padx=10, pady=10)
-
-    sub_product_options = ["Sub Product A", "Sub Product B", "Sub Product C"]  # Example options
-    sub_product_dropdown = ttk.Combobox(
-        opening_stock_window,
-        textvariable=sub_product_var,
-        values=sub_product_options,
-        state="readonly",
-        width=30
-    )
-    sub_product_dropdown.grid(row=2, column=1, columnspan=3, padx=10, pady=10)
-
-    # Fourth Line: Pcs
-    tk.Label(
-        opening_stock_window,
-        text="Pcs:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=3, column=0, sticky="w", padx=10, pady=10)
-
-    pcs_entry = tk.Entry(
-        opening_stock_window,
-        textvariable=pcs_var,
-        font=("Arial", 12),
-        width=30
-    )
-    pcs_entry.grid(row=3, column=1, columnspan=3, padx=10, pady=10)
-
-    # Fifth Line: Gross Weight
-    tk.Label(
-        opening_stock_window,
-        text="Gross Weight:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=4, column=0, sticky="w", padx=10, pady=10)
-
-    gross_wt_entry = tk.Entry(
-        opening_stock_window,
-        textvariable=gross_wt_var,
-        font=("Arial", 12),
-        width=30
-    )
-    gross_wt_entry.grid(row=4, column=1, columnspan=3, padx=10, pady=10)
-
-    # Sixth Line: Melting Weight
-    tk.Label(
-        opening_stock_window,
-        text="Melting Weight:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=5, column=0, sticky="w", padx=10, pady=10)
-
-    melting_entry = tk.Entry(
-        opening_stock_window,
-        textvariable=melting_var,
-        font=("Arial", 12),
-        width=30
-    )
-    melting_entry.grid(row=5, column=1, columnspan=3, padx=10, pady=10)
-
-    # Seventh Line: Net Weight
-    tk.Label(
-        opening_stock_window,
-        text="Net Weight:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=6, column=0, sticky="w", padx=10, pady=10)
-
-    net_wt_entry = tk.Entry(
-        opening_stock_window,
-        textvariable=net_wt_var,
-        font=("Arial", 12),
-        width=30
-    )
-    net_wt_entry.grid(row=6, column=1, columnspan=3, padx=10, pady=10)
-
-    # Eighth Line: Rate
-    tk.Label(
-        opening_stock_window,
-        text="Rate:",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=7, column=0, sticky="w", padx=10, pady=10)
-
-    rate_entry = tk.Entry(
-        opening_stock_window,
-        textvariable=rate_var,
-        font=("Arial", 12),
-        width=30
-    )
-    rate_entry.grid(row=7, column=1, columnspan=3, padx=10, pady=10)
-
-    # Ninth Line: MC@
-    tk.Label(
-        opening_stock_window,
-        text="MC@: ",
-        font=("Arial", 12),
-        bg="lightblue"
-    ).grid(row=8, column=0, sticky="w", padx=10, pady=10)
-
-    mc_entry = tk.Entry(
-        opening_stock_window,
-        textvariable=mc_var,
-        font=("Arial", 12),
-        width=30
-    )
-    mc_entry.grid(row=8, column=1, columnspan=3, padx=10, pady=10)
-
-    # Function to save the entered details
     def save_entry():
-        if (
-            operation_var.get() and
-            main_product_var.get() and
-            sub_product_var.get() and
-            pcs_var.get() and
-            gross_wt_var.get() and
-            melting_var.get() and
-            net_wt_var.get() and
-            rate_var.get() and
-            mc_var.get()
-        ):
-            messagebox.showinfo("Saved", "Details Saved Successfully!")
+        date = date_entry.get()
+        main_ledger = main_ledger_combo.get()
+        sub_ledger = sub_ledger_combo.get()
+        weight = weight_entry.get()
+        amount = amount_entry.get()
+
+        cursor.execute("""INSERT INTO customer_summary (DATE, MAIN_LEDGER_NAME, SUB_LEDGER_NAME, WEIGHT, AMOUNT)
+                          VALUES (?, ?, ?, ?, ?)""",
+                       (date, main_ledger, sub_ledger, weight, amount))
+        conn.commit()
+        messagebox.showinfo("Success", "Stock saved successfully")
+        cancel_entry()
+
+    def correction_entry():
+        main_ledger = main_ledger_combo.get()
+        sub_ledger = sub_ledger_combo.get()
+
+        cursor.execute("SELECT * FROM customer_summary WHERE MAIN_LEDGER_NAME = ? AND SUB_LEDGER_NAME = ?",
+                       (main_ledger, sub_ledger))
+        entry = cursor.fetchone()
+
+        if entry:
+            # Populate the fields with the fetched data
+            date_entry.delete(0, tk.END)
+            date_entry.insert(0, entry[1])
+            weight_entry.delete(0, tk.END)
+            weight_entry.insert(0, entry[4])
+            amount_entry.delete(0, tk.END)
+            amount_entry.insert(0, entry[5])
+
+            correction_button.config(text="Update", command=lambda: update_entry(entry[0]))
         else:
-            messagebox.showwarning("Missing Fields", "Please fill all the fields!")
+            messagebox.showinfo("No Data", "No data found for the selected main and sub ledger.")
+
+    def update_entry(entry_id):
+        date = date_entry.get()
+        main_ledger = main_ledger_combo.get()
+        sub_ledger = sub_ledger_combo.get()
+        weight = weight_entry.get()
+        amount = amount_entry.get()
+
+        cursor.execute("""UPDATE customer_summary SET DATE=?, MAIN_LEDGER_NAME=?, SUB_LEDGER_NAME=?, WEIGHT=?, AMOUNT=?
+                          WHERE id=?""",
+                       (date, main_ledger, sub_ledger, weight, amount, entry_id))
+        conn.commit()
+        messagebox.showinfo("Success", "Stock updated successfully")
+        cancel_entry()
 
     def cancel_entry():
-        # Clear all fields
-        operation_var.set("Correction")
-        main_product_var.set("")
-        sub_product_var.set("")
-        pcs_var.set("")
-        gross_wt_var.set("")
-        melting_var.set("")
-        net_wt_var.set("")
-        rate_var.set("")
-        mc_var.set("")
+        main_ledger_combo.set("")
+        sub_ledger_combo.set("")
+        weight_entry.delete(0, tk.END)
+        amount_entry.delete(0, tk.END)
 
-    # Buttons
-    tk.Button(
-        opening_stock_window,
-        text="Save",
-        font=("Arial", 12),
-        bg="green",
-        fg="white",
-        width=10,
-        command=save_entry
-    ).grid(row=9, column=0, pady=20)
+        correction_button.config(text="Correction", command=correction_entry)
 
-    tk.Button(
-        opening_stock_window,
-        text="Cancel",
-        font=("Arial", 12),
-        bg="orange",
-        fg="white",
-        width=10,
-        command=cancel_entry
-    ).grid(row=9, column=1, pady=20)
+    def fetch_main_ledger():
+        try:
+            cursor.execute("SELECT UPPER(name) FROM main_ledger")
+            return [row[0] for row in cursor.fetchall()]
+        except sqlite3.OperationalError as e:
+            messagebox.showerror("Database Error", f"An error occurred: {e}")
 
-    tk.Button(
-        opening_stock_window,
-        text="Exit",
-        font=("Arial", 12),
-        bg="red",
-        fg="white",
-        width=10,
-        command=opening_stock_window.destroy
-    ).grid(row=9, column=2, pady=20)
-### opening balance page ended
+    def fetch_sub_ledger(selected_main_ledger):
+        try:
+            cursor.execute("SELECT UPPER(name) FROM sub_ledger WHERE UPPER(main_ledger)=?", (selected_main_ledger.upper(),))
+            return [row[0] for row in cursor.fetchall()]
+        except sqlite3.OperationalError as e:
+            messagebox.showerror("Database Error", f"An error occurred: {e}")
+            return []
+
+    def update_sub_ledger(event):
+        selected_main_ledger = main_ledger_combo.get()
+        if selected_main_ledger:
+            sub_ledger = fetch_sub_ledger(selected_main_ledger)
+            sub_ledger_combo['values'] = sub_ledger
+            sub_ledger_combo.set("")  # Clear the current selection
+        else:
+            sub_ledger_combo['values'] = []
+            sub_ledger_combo.set("")
+
+    # Variables for input fields
+    tk.Label(opening_balance_window, text="Opening Balance", font=("Times", 25, "bold"), bg="lightblue", fg="green").pack(pady=10)
+
+    # Top frame for date, main_ledger, sub_ledger
+    top_frame = tk.Frame(opening_balance_window, bg="lightblue")
+    top_frame.pack(pady=20)
+
+    # Date entry
+    tk.Label(top_frame, text="Date", font=("Times", 15), bg="lightblue").grid(row=0, column=0, padx=10)
+    date_entry = tk.Entry(top_frame, font=("Times", 15), width=10, bd=4)
+    date_entry.insert(0, datetime.now().strftime('%d-%m-%Y'))
+    date_entry.grid(row=1, column=0, padx=10, pady=5)
+    date_entry.bind('<Return>', focus_next_widget)
+
+    # Main Ledger
+    tk.Label(top_frame, text="Main Ledger", font=("Times", 15), bg="lightblue").grid(row=0, column=1, padx=10)
+    main_ledger_combo = ttk.Combobox(top_frame, values=fetch_main_ledger(), state="readonly", width=25, font=("Times", 14))
+    main_ledger_combo.grid(row=1, column=1, padx=10)
+    main_ledger_combo.bind('<<ComboboxSelected>>', update_sub_ledger)
+    main_ledger_combo.bind('<Return>', focus_next_widget)
+
+    # Sub Ledger
+    tk.Label(top_frame, text="Sub Ledger Name", font=("Times", 15), bg="lightblue").grid(row=0, column=2, padx=10)
+    sub_ledger_combo = ttk.Combobox(top_frame, state="readonly", width=25)
+    sub_ledger_combo.grid(row=1, column=2, padx=10)
+    sub_ledger_combo.bind('<Return>', focus_next_widget)
+
+    middle_frame = tk.Frame(opening_balance_window, bg="lightblue")
+    middle_frame.pack(pady=10)
+
+    # Middle frame with radio buttons and weight/amount fields
+    tk.Radiobutton(middle_frame, text="Receipt", font=("Times", 15), bg="lightblue").grid(row=1, column=0, padx=5)
+    tk.Radiobutton(middle_frame, text="Issue", font=("Times", 15), bg="lightblue").grid(row=1, column=1, padx=10)
+
+    tk.Label(middle_frame, text="Weight", font=("Times", 15), bg="lightblue").grid(row=0, column=2, padx=10)
+    weight_entry = tk.Entry(middle_frame, bd=4, font=("Times", 15))
+    weight_entry.grid(row=1, column=2, padx=10)
+    weight_entry.bind('<Return>', focus_next_widget)
+
+    tk.Label(middle_frame, text="Amount", font=("Times", 15), bg="lightblue").grid(row=0, column=3, padx=10)
+    amount_entry = tk.Entry(middle_frame, bd=4, font=("Times", 15))
+    amount_entry.grid(row=1, column=3, padx=10)
+    amount_entry.bind('<Return>', focus_next_widget)
+
+    button_frame = tk.Frame(opening_balance_window, bg="lightblue")
+    button_frame.pack(pady=10)
+
+    # Buttons for save, correction, cancel, and exit
+    tk.Button(button_frame, text="Save", command=save_entry, width=15, bg="purple").grid(row=0, column=0, padx=10)
+    correction_button = tk.Button(button_frame, text="Correction", command=correction_entry, width=15, bg="blue")
+    correction_button.grid(row=0, column=1, padx=10, pady=10)
+    
+    tk.Button(button_frame, text="Cancel", command=cancel_entry, width=15, bg="green").grid(row=0, column=2, padx=10)
+    tk.Button(button_frame, text="Exit", bg="red", width=15, command=opening_balance_window.destroy).grid(row=0, column=3, padx=10)
+
+
+
