@@ -292,7 +292,7 @@ def add_item(event=None):
 
 
     # if transaction=="Metal Receipt":
-    #     Metaling_Label=tk.Label(root, text="Melting", font=("Arial", 12, "bold"), bg="lightpink")
+    #     Metaling_Label=tk.Label(root, text="Melting", font=("Arial", 12, "bold"), bg="lightseagreen")
     #     Metaling_Label.grid(row=4, column=2, height=20, width=40)
     #     Metaling_Entry=tk.Entry(root, padx=10, width=8, font=("Arial", 12, "bold"))
     #     Metaling_Entry.grid(stciky="w", row=4, column=3)
@@ -303,7 +303,7 @@ def add_item(event=None):
 # """)
     
 #     elif transaction=="Metal Issue":
-#         Metaling_issue_Label=tk.Label(root, text="Melting", font=("Arial", 12, "bold"), bg="lightpink")
+#         Metaling_issue_Label=tk.Label(root, text="Melting", font=("Arial", 12, "bold"), bg="lightseagreen")
 #         Metaling_issue_Label.grid(row=4, column=2, height=20, width=40)
 #         Metaling_issue_Entry=tk.Entry(root, padx=10, width=8, font=("Arial", 12, "bold"))
 #         Metaling_issue_Entry.grid(stciky="w", row=4, column=3)
@@ -490,7 +490,7 @@ screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 
 root.geometry(f"{screen_width}x{screen_height}")
-root.configure(bg="lightpink")
+root.configure(bg="lightseagreen")
 
 # Create menu bar
 menu_bar = tk.Menu(root)
@@ -528,24 +528,24 @@ report_menu.add_command(label="Party Balance", command=lambda:party_balance(root
 #Exit
 exit_menu.add_command(label="Exit", command=exit_program)
 
-cash_receipt_label = tk.Label(root, text="Cash Receipt", font=("Times", 25, "bold"), bg="lightpink", fg="Green")
+cash_receipt_label = tk.Label(root, text="Cash Receipt", font=("Times", 25, "bold"), bg="lightseagreen", fg="blue")
 cash_receipt_label.pack(pady=10)
 #############################################################################################################################
 
 
 # Top Frame - Row 1: Basic Details
 # Top Frame - Line 1: Date, Transaction, Party Name
-top_frame = tk.Frame(root, bg="lightpink")
+top_frame = tk.Frame(root, bg="lightseagreen")
 top_frame.pack(pady=10)
 
 # Row 1
-tk.Label(top_frame, text="Date", bg="lightpink", font=("Times", 15), anchor="w").grid(row=0, column=0, padx=5)
+tk.Label(top_frame, text="Date", bg="lightseagreen", font=("Times", 15), anchor="w").grid(row=0, column=0, padx=5)
 date_entry = tk.Entry(top_frame, width=15, justify="center", font=("Times",14), bd=4)
 date_entry.insert(0, datetime.now().strftime("%d-%m-%Y"))
 date_entry.grid(row=1, column=0, padx=5, sticky="w")
 date_entry.bind("<Return>", focus_next_widget)
 
-tk.Label(top_frame, text="Transaction", bg="lightpink", font=("Times", 15)).grid(row=0, column=1, padx=5)
+tk.Label(top_frame, text="Transaction", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=1, padx=5)
 transaction_combo = ttk.Combobox(top_frame, values=["Cash Receipt", "Cash Payment", "Purchase", "Purchase Return", "Sales", "Sales Return", "Metal Receipt", "Metal Issue", "Rate Cut Sales", "Rate Cut Purchase", "Achari Receipt", "Achari Issue", "Approval Issue", "Approval Receipt"], width=15, justify="center", font=("Times",14))
 transaction_combo.grid(row=1, column=1, padx=5, sticky="w")
 transaction_combo.bind("<Return>", focus_next_widget)
@@ -558,69 +558,69 @@ def update_label(event):
 # Bind the selection event to the function
 transaction_combo.bind("<<ComboboxSelected>>", update_label)
 
-tk.Label(top_frame, text="Party Name", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=5)
+tk.Label(top_frame, text="Party Name", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=2, padx=5)
 party_entry = tk.Entry(top_frame, width=20, justify="center", font=("Times",14), bd=4)
 party_entry.grid(row=1, column=2, padx=5, sticky="w")
 party_entry.bind("<Return>", focus_next_widget)
 
 # Middle Frame - Line 2: Main Product, Sub Product, Gross Wt, Stones, Touch, Net Wt, MC@, MC
-middle_frame = tk.Frame(root, bg="lightpink")
+middle_frame = tk.Frame(root, bg="lightseagreen")
 middle_frame.pack(pady=10)
 
-tk.Label(middle_frame, text="Main Product", bg="lightpink", font=("Times", 15)).grid(row=0, column=0, padx=5)
+tk.Label(middle_frame, text="Main Product", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=0, padx=5)
 main_product_combo = ttk.Combobox(middle_frame, values=fetch_main_product(), state="readonly", width=20, justify="center", font=("Times",14))
 main_product_combo.grid(row=1, column=0, padx=5, sticky="w")
 main_product_combo.bind('<<ComboboxSelected>>',update_sub_products)
 main_product_combo.bind("<Return>", focus_next_widget)
 
-tk.Label(middle_frame, text="Design", bg="lightpink", font=("Times", 15)).grid(row=0, column=1, padx=5)
+tk.Label(middle_frame, text="Design", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=1, padx=5)
 sub_product_combo = ttk.Combobox(middle_frame, state="readonly", width=20, justify="center", font=("Times",14))
 sub_product_combo.grid(row=1, column=1, padx=5, sticky="w")
 sub_product_combo.bind("<Return>", focus_next_widget)
 
-tk.Label(middle_frame, text="Gross Wt", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=5)
+tk.Label(middle_frame, text="Gross Wt", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=2, padx=5)
 gross_wt_entry = tk.Entry(middle_frame, width=8, justify="center", font=("Times",14), bd=4)
 gross_wt_entry.grid(row=1, column=2, padx=5, sticky="w")
 gross_wt_entry.bind("<Return>", focus_next_widget)
 
-tk.Label(middle_frame, text="Cover", bg="lightpink", font=("Times", 15)).grid(row=0, column=3, padx=5)
+tk.Label(middle_frame, text="Cover", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=3, padx=5)
 stones_entry = tk.Entry(middle_frame, width=7, justify="center", font=("Times",14), bd=4)
 stones_entry.grid(row=1, column=3, padx=5, sticky="w")
 stones_entry.bind("<Return>", focus_next_widget)
 
-tk.Label(middle_frame, text="Touch", bg="lightpink", font=("Times", 15)).grid(row=0, column=4, padx=5)
+tk.Label(middle_frame, text="Touch", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=4, padx=5)
 touch_entry = tk.Entry(middle_frame, width=8, justify="center", font=("Times",14), bd=4)
 touch_entry.grid(row=1, column=4, padx=5, sticky="w")
 touch_entry.bind("<Return>", calculate_net_wt)
 
 
-tk.Label(middle_frame, text="Net Wt", bg="lightpink", font=("Times", 15)).grid(row=0, column=5, padx=5)
+tk.Label(middle_frame, text="Net Wt", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=5, padx=5)
 net_wt_entry = tk.Entry(middle_frame, width=10, justify="center", font=("Times",14), bd=4)
 net_wt_entry.grid(row=1, column=5, padx=5, sticky="w")
 net_wt_entry.bind("<Return>", focus_next_widget)
 
 
-tk.Label(middle_frame, text="MC@", bg="lightpink", font=("Times", 15)).grid(row=0, column=6, padx=5)
+tk.Label(middle_frame, text="MC@", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=6, padx=5)
 mc_at_entry = tk.Entry(middle_frame, width=7, justify="center", font=("Times",14), bd=4)
 mc_at_entry.grid(row=1, column=6, padx=5, sticky="w")
 mc_at_entry.bind("<Return>", display_mc_at_value)
 
 
-tk.Label(middle_frame, text="MC", bg="lightpink", font=("Times", 15)).grid(row=0, column=7, padx=5)
+tk.Label(middle_frame, text="MC", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=7, padx=5)
 mc_entry = tk.Entry(middle_frame, width=8, justify="center", font=("Times",14), bd=4)
 mc_entry.grid(row=1, column=7, padx=5, sticky="w")
 mc_entry.bind("<Return>", calculate_mc)
 
 # Bottom Frame - Line 3: Rate, Amount, Narration
-bottom_frame = tk.Frame(root, bg="lightpink")
+bottom_frame = tk.Frame(root, bg="lightseagreen")
 bottom_frame.pack(pady=10)
 
-tk.Label(bottom_frame, text="Rate", bg="lightpink", font=("Times", 15)).grid(row=0, column=0, padx=5)
+tk.Label(bottom_frame, text="Rate", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=0, padx=5)
 rate_entry = tk.Entry(bottom_frame, width=10, justify="center", font=("Times",14), bd=4)
 rate_entry.grid(row=1, column=0, padx=5, sticky="w")
 rate_entry.bind("<Return>", fetch_rate_value)
 
-tk.Label(bottom_frame, text="Amount", bg="lightpink", font=("Times", 15)).grid(row=0, column=1, padx=5)
+tk.Label(bottom_frame, text="Amount", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=1, padx=5)
 amount_entry = tk.Entry(bottom_frame, width=11, justify="center", font=("Times",14), bd=4)
 amount_entry.grid(row=1, column=1, padx=5, sticky="w")
 amount_entry.bind("<Return>", calculate_amount)
@@ -629,19 +629,19 @@ amount_entry.bind("<Return>", calculate_amount)
 # amount_value=amount_entry.get()
 
 # if amount_value== "" or 0 or 0.0:
-#     tk.Label(bottom_frame, text="Metal", bg="lightpink", font=("Times", 15)).grid(row=0, column=2, padx=5)
+#     tk.Label(bottom_frame, text="Metal", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=2, padx=5)
 #     metal_entry = tk.Entry(bottom_frame, width=11, justify="center", font=("Times",14), bd=4)
 #     metal_entry.grid(row=1, column=2, padx=5, sticky="w")
 #     metal_entry.bind("<Return>", focus_next_widget)
 
-tk.Label(bottom_frame, text="Narration", bg="lightpink", font=("Times", 15)).grid(row=0, column=3, columnspan=3,padx=5)
+tk.Label(bottom_frame, text="Narration", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=3, columnspan=3,padx=5)
 narration_entry = tk.Entry(bottom_frame, width=30, justify="center", font=("Times",14), bd=4)
 narration_entry.grid(row=1, column=3, padx=5, columnspan=3, sticky="w")
 narration_entry.bind("<Return>", add_item)
 
 
 # Frame for the Treeview and Scrollbars
-tree_frame = tk.Frame(root, bg="lightpink", width=300, height=800)
+tree_frame = tk.Frame(root, bg="lightseagreen", width=300, height=800)
 tree_frame.pack_propagate(False)  # Prevent the frame from resizing to fit its content
 tree_frame.pack(pady=10)
 
@@ -700,15 +700,15 @@ tree_frame.grid_rowconfigure(0, weight=1)
 tree_frame.grid_columnconfigure(0, weight=1)
 
 # Footer Frame - Buttons
-footer_frame = tk.Frame(root, bg="lightpink")
+footer_frame = tk.Frame(root, bg="lightseagreen")
 footer_frame.pack(pady=20)
 
 # tk.Button(footer_frame, text="Add", width=12, bg="green", fg="white").grid(row=0, column=0, padx=10)
-tk.Button(footer_frame, text="Delete", width=12, bg="red", fg="white", command=delete_item).grid(row=0, column=1, padx=10)
-tk.Button(footer_frame, text="Save", width=12, bg="blue", fg="white", command=save_items).grid(row=0, column=2, padx=10)
-correction_button=tk.Button(footer_frame, text="Correction", width=12, bg="purple", fg="white", command=correction_item)
+tk.Button(footer_frame, text="Delete", width=12, bg="red", fg="white",bd=5, relief="raised", font=("Times", 12, "bold"), command=delete_item).grid(row=0, column=1, padx=10)
+tk.Button(footer_frame, text="Save", width=12, bg="blue", fg="white", bd=5,  relief="raised", font=("Times", 12, "bold"), command=save_items).grid(row=0, column=2, padx=10)
+correction_button=tk.Button(footer_frame, text="Correction", width=12, bg="purple", fg="white", bd=5,  relief="raised",font=("Times", 12, "bold"),  command=correction_item)
 correction_button.grid(row=0,column=3, padx=10)
-tk.Button(footer_frame, text="Exit", width=12, bg="orange", fg="white", command=root.destroy).grid(row=0, column=4, padx=10)
+tk.Button(footer_frame, text="Exit", width=12, bg="orange", fg="white", bd=5, relief="raised", font=("Times", 12, "bold"), command=root.destroy).grid(row=0, column=4, padx=10)
 
 # Run the application
 root.mainloop()

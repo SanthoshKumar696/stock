@@ -37,7 +37,7 @@ def day_book(root):
             
             # Execute the query using the dates as they are (DD-MM-YYYY)
             cursor.execute(
-                "SELECT * FROM saved_data WHERE date BETWEEN ? AND ? ORDER BY date",
+                "SELECT * FROM saved_data WHERE date BETWEEN ? AND ? ORDER BY id",
                 (from_date, to_date)  # Use dates as they are in DD-MM-YYYY format
             )
             rows = cursor.fetchall()
@@ -53,46 +53,50 @@ def day_book(root):
     def generate_html_report(transactions):
         html_content = """
         <html>
-        <head>
-            <style>
-                table {width: 100%; border-collapse: collapse;}
-                .center { text-align: center;}
-                tr:nth-child(even) {background-color: #f9f9f9;}  /* Alternating row colors */
-                tr:hover {background-color: #d3d3d3;} 
-                th, td {border: 1px solid black; padding: 8px; text-align: left;}
-                th {background-color: #f2f2f2;}
-            </style>
-        </head>
-        <body>
-            <h2>Transaction Report</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Date</th>
-                        <th class="center">Party Name</th>
-                        <th>Transaction</th>
-                        <th>Main Product</th>
-                        <th>Sub Product</th>
-                        <th>Gross Wt</th>
-                        <th>Stones</th>
-                        <th>Touch</th>
-                        <th>Net Wt</th>
-                        <th>MC@</th>
-                        <th>MC</th>
-                        <th>Rate</th>
-                        <th>Amount</th>
-                        <th>Narration</th>
-                    </tr>
-                </thead>
-                <tbody>
-        """
+    <head>
+        <style>
+            table {width: 100%; border-collapse: collapse;}
+            .center { text-align: center;}
+            tr:nth-child(even) {background-color: #f9f9f9;}  /* Alternating row colors */
+            tr:hover {background-color: #d3d3d3;} 
+            th, td {border: 1px solid black; padding: 8px; text-align: left;}
+            th {background-color: #f2f2f2;}
+            .date-column {width: 150px;}  /* Set width for the Date column */
+        </style>
+    </head>
+    <body>
+        <h2>Transaction Report</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th class="date-column">Date</th> <!-- Apply the class to Date header -->
+                    <th class="center">Party Name</th>
+                    <th>Transaction</th>
+                    <th>Main Product</th>
+                    <th>Sub Product</th>
+                    <th>Gross Wt</th>
+                    <th>Stones</th>
+                    <th>Touch</th>
+                    <th>Net Wt</th>
+                    <th>MC@</th>
+                    <th>MC</th>
+                    <th>Rate</th>
+                    <th>Amount</th>
+                    <th>Narration</th>
+                </tr>
+            </thead>
+            <tbody>
+    """
         
         # Loop through the transactions and create rows
         for row in transactions:
             html_content += "<tr>"
-            for cell in row:
-                html_content += f"<td>{cell}</td>"
+            for index, cell in enumerate(row):
+                if index == 1:  # This is the "Date" column (index 1)
+                    html_content += f"<td class='date-column'>{cell}</td>"  # Apply the same class here
+                else:
+                    html_content += f"<td>{cell}</td>"
             html_content += "</tr>"
         
         # Closing tags for the table and HTML

@@ -2,11 +2,17 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
 from datetime import datetime
+from tkinter import Toplevel, Text
 
 def open_sub_ledger(root):
     # Create a new window for Sub Ledger
     sub_ledger_window = tk.Toplevel()
     sub_ledger_window.title("Sub Ledger Master")
+    #this function is using Enter button cliking move the next column
+    def focus_next_widget(event):
+        """Move the focus to the next widget."""
+        event.widget.tk_focusNext().focus()
+        return "break"
 
     # Get screen dimensions to make window full size
     screen_width = root.winfo_screenwidth()
@@ -53,12 +59,6 @@ def open_sub_ledger(root):
     ob_balance_var = tk.DoubleVar()
     operation_variable_1 = tk.StringVar()  # For OB Rate (Receipt/Issue)
     operation_variable_2 = tk.StringVar()  # For OB Balance (Receipt/Issue)
-
-    # Function to move focus to the next widget when Enter is pressed
-    def focus_next_widget(event):
-        """Move the focus to the next widget."""
-        event.widget.tk_focusNext().focus()
-        return "break"
 
     # Frame to hold all widgets (for better organization)
     main_frame = tk.Frame(sub_ledger_window, bg="lightblue")
@@ -197,4 +197,47 @@ def open_sub_ledger(root):
         command=lambda: messagebox.showinfo("Name List", "Display the name list logic here.")
     )
     name_list_button.grid(row=0, column=3, pady=20, padx=10)
+
+    # Report Generation Function
+    def generate_report():
+        try:
+            cursor.execute("""
+                SELECT name, ob_rate_receipt, ob_rate_issue, ob_balance_receipt, ob_balance_issue
+                FROM sub_ledger
+            """)
+            result = cursor.fetchall()
+
+            # Create a new Toplevel window to display the report
+            report_window = Toplevel(sub_ledger_window)
+            report_window.title("Sub Ledger Report")
+
+            # Add a Text widget to display the report
+            report_text = Text(report_window, wrap="word", width=100, height=30, font=("Arial", 12))
+            report_text.pack(padx=10, pady=10)
+
+            # Add report header
+            report_text.insert(tk.END, f"{'Customer Name':<20}{'Receipt - Rs':<20}{'Receipt - Metal':<20}{'Issue - Rs':<20}{'Issue - Metal':<20}\n")
+            report_text.insert(tk.END, "="*100 + "\n")
+
+            # Add data for each customer
+            for row in result:
+                name, ob_rate_receipt, ob_rate_issue, ob_balance_receipt, ob_balance_issue = row
+                report_text.insert(tk.END, f"{name:<20}{ob_rate_receipt:<20}{ob_balance_receipt:<20}{ob_rate_issue:<20}{ob_balance_issue:<20}\n")
+
+            # Disable the text widget so the user can't edit it
+            report_text.config(state=tk.DISABLED)
+        except sqlite3.Error as e:
+            messagebox.showerror("Database Error", f"Error fetching data: {e}")
+
+    # Generate Report Button
+    report_button = tk.Button(
+        button_frame,
+        text="Generate Report",
+        font=("Arial", 12),
+        bg="blue",
+        fg="white",
+        width=15,
+        command=generate_report
+    )
+    report_button.grid(row=0, column=4, pady=20, padx=10)
 
