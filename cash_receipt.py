@@ -54,6 +54,7 @@ def fetch_sub_product(selected_main_product):
 
 def update_sub_products(event):
     selected_main_product = main_product_combo.get()
+    main_product_label.config(text=selected_main_product)
     print(f"Selected Main Product: {selected_main_product}")
     if selected_main_product:
         sub_products = fetch_sub_product(selected_main_product)
@@ -232,7 +233,7 @@ def add_item(event=None):
     max_id = cursor.fetchone()[0]
     sl_no = (max_id+1) if max_id else 1
     date = date_entry.get()
-    name = party_entry.get()
+    name = party_name_combo.get()
     transaction = transaction_combo.get()
     main_product = main_product_combo.get()
     sub_product = sub_product_combo.get()
@@ -281,7 +282,7 @@ def add_item(event=None):
         
         # Clear input fields
         
-        party_entry.delete(0, tk.END)
+        party_name_combo.delete(0, tk.END)
         amount_entry.delete(0, tk.END)
         main_product_combo.set("")
         sub_product_combo.set("")
@@ -290,48 +291,110 @@ def add_item(event=None):
     except sqlite3.Error as e:
         messagebox.showerror("Database Error", f"Error: {e}")
 
+def fetch_party_names(main_ledger):
+    """Fetch the party names based on the main_ledger."""
+    try:
+        cursor.execute("SELECT UPPER(name) FROM sub_ledger WHERE main_ledger = ?", (main_ledger,))
+        return [row[0] for row in cursor.fetchall()]
+    except sqlite3.OperationalError as e:
+        messagebox.showerror("Database Error", f"An error occurred: {e}")
+        return []
 
-    # if transaction=="Metal Receipt":
-    #     Metaling_Label=tk.Label(root, text="Melting", font=("Arial", 12, "bold"), bg="lightseagreen")
-    #     Metaling_Label.grid(row=4, column=2, height=20, width=40)
-    #     Metaling_Entry=tk.Entry(root, padx=10, width=8, font=("Arial", 12, "bold"))
-    #     Metaling_Entry.grid(stciky="w", row=4, column=3)
-
-#         if True:
-#             cursor.execute("""
-#             UPDATE SET saved_data date=?, name=? WHERE id=?,(date,name, id)
-# """)
+def handle_transaction(event):
+    """Handles the transaction selection and updates party names."""
+    selected_transaction = transaction_combo.get()
+    print(f"Handling transaction: {selected_transaction}")
     
-#     elif transaction=="Metal Issue":
-#         Metaling_issue_Label=tk.Label(root, text="Melting", font=("Arial", 12, "bold"), bg="lightseagreen")
-#         Metaling_issue_Label.grid(row=4, column=2, height=20, width=40)
-#         Metaling_issue_Entry=tk.Entry(root, padx=10, width=8, font=("Arial", 12, "bold"))
-#         Metaling_issue_Entry.grid(stciky="w", row=4, column=3)
+    # Logic for handling different types of transactions using if-else or elif statements
+    if selected_transaction == "Cash Receipt":
+        print("Handling Cash Receipt")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
 
-#         if True:
-#             cursor.execute("""
+    elif selected_transaction == "Cash Payment":
+        print("Handling Cash Payment")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
 
-#             UPDATE SET saved_data date=?, name=? WHERE id=?,(date,name,id)
-# """)
-    
-#     elif transaction=="Cash Receipt":
-#         Cash_Receipt=tk.Label(root, text="cash Receipt", font=("Arial", 12, "Strong"), bg="lightblue")
-    #     Cash_Receipt.grid(row=4, column=5, width=10)
-    #     Cash_Receipt_Entry=tk.Label(root, width=8, bd=2)
-    #     Cash_Receipt_Entry.grid(row=4, column=5)
+    elif selected_transaction == "Purchase":
+        print("Handling Purchase")
+        party_names = fetch_party_names('suppliers')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
 
-    #     if True:
-    #         cursor.execute("""
-    #             UPDATE SET customer_summary amount=amount-? WHERE id=?,(amount, id,)    """)
-            
-    # elif transaction=="Cash Payment":
-    #     Cash_Payment=tk.Label(root, text="cash payment")
-    #     Cash_Payment.grid(row=4, column=7)
-    #     Cash_Payment_Entry=tk.Entry(root, width=8, bd=3)
-    #     Cash_Payment_Entry.grid(row=3, column=8)
+    elif selected_transaction == "Purchase Return":
+        print("Handling Purchase Return")
+        party_names = fetch_party_names('suppliers')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
 
-    #     if True:
-    #         cursor.execute("""UPDATE SET customer_summary amount=amount+? WHERE""")
+    elif selected_transaction == "Sales":
+        print("Handling Sales")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
+
+    elif selected_transaction == "Sales Return":
+        print("Handling Sales Return")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
+
+    elif selected_transaction == "Metal Receipt":
+        print("Handling Metal Receipt")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
+
+    elif selected_transaction == "Metal Issue":
+        print("Handling Metal Issue")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
+
+    elif selected_transaction == "Rate Cut Sales":
+        print("Handling Rate Cut Sales")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
+
+    elif selected_transaction == "Rate Cut Purchase":
+        print("Handling Rate Cut Purchase")
+        party_names = fetch_party_names('suppliers')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
+
+    # Future Transactions (Adding new transaction types in the future)
+    elif selected_transaction == "Achari Receipt":
+        print("Handling Achari Receipt")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
+
+    elif selected_transaction == "Achari Issue":
+        print("Handling Achari Issue")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
+
+    elif selected_transaction == "Approval Issue":
+        print("Handling Approval Issue")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
+
+    elif selected_transaction == "Approval Receipt":
+        print("Handling Approval Receipt")
+        party_names = fetch_party_names('CUSTOMERS')
+        party_name_combo["values"] = party_names
+        party_name_combo.set("")  # Reset selection
+
+    else:
+        print("Invalid transaction type selected!")
+        party_name_combo["values"] = []
+        party_name_combo.set("") 
 
 #########################################################################################################################
 # Function to delete an item from the treeview and database
@@ -377,8 +440,8 @@ def correction_item():
     # Populate fields with the selected record's data
     date_entry.delete(0, tk.END)
     date_entry.insert(0, record[1])  # Date
-    party_entry.delete(0, tk.END)
-    party_entry.insert(0, record[2])  # Party Name
+    party_name_combo.delete(0, tk.END)
+    party_name_combo.insert(0, record[2])  # Party Name
     main_product_combo.set(record[3])  # Main Product
     sub_product_combo.set(record[4])  # Sub Product
     transaction_combo.set(record[5])  # Transaction
@@ -411,7 +474,7 @@ def update_item():
     # Fetch updated values from entry fields
     updated_values=(
         date_entry.get(),
-        party_entry.get(),
+        party_name_combo.get(),
         main_product_combo.get(),
         sub_product_combo.get(),
         transaction_combo.get(),
@@ -457,7 +520,7 @@ def update_item():
 
 # Completed the Update Data or correction_item function as Ended
 def clear_fields():
-    party_entry.delete(0, tk.END)
+    party_name_combo.delete(0, tk.END)
     gross_wt_entry.delete(0, tk.END)
     stones_entry.delete(0, tk.END)
     touch_entry.delete(0, tk.END)
@@ -531,8 +594,8 @@ exit_menu.add_command(label="Exit", command=exit_program)
 cash_receipt_label = tk.Label(root, text="Cash Receipt", font=("Times", 25, "bold"), bg="lightseagreen", fg="blue")
 cash_receipt_label.pack(pady=10)
 #############################################################################################################################
-
-
+# rtcytfvugybiunoim,iuyd
+# #####################################
 # Top Frame - Row 1: Basic Details
 # Top Frame - Line 1: Date, Transaction, Party Name
 top_frame = tk.Frame(root, bg="lightseagreen")
@@ -548,6 +611,7 @@ date_entry.bind("<Return>", focus_next_widget)
 tk.Label(top_frame, text="Transaction", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=1, padx=5)
 transaction_combo = ttk.Combobox(top_frame, values=["Cash Receipt", "Cash Payment", "Purchase", "Purchase Return", "Sales", "Sales Return", "Metal Receipt", "Metal Issue", "Rate Cut Sales", "Rate Cut Purchase", "Achari Receipt", "Achari Issue", "Approval Issue", "Approval Receipt"], width=15, justify="center", font=("Times",14))
 transaction_combo.grid(row=1, column=1, padx=5, sticky="w")
+ # Bind to handle the transaction selection
 transaction_combo.bind("<Return>", focus_next_widget)
 
 # Function to update the label when a value is selected
@@ -557,21 +621,30 @@ def update_label(event):
 
 # Bind the selection event to the function
 transaction_combo.bind("<<ComboboxSelected>>", update_label)
+transaction_combo.bind('<<ComboboxSelected>>', handle_transaction) 
 
+# Party Name ComboBox
 tk.Label(top_frame, text="Party Name", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=2, padx=5)
-party_entry = tk.Entry(top_frame, width=20, justify="center", font=("Times",14), bd=4)
-party_entry.grid(row=1, column=2, padx=5, sticky="w")
-party_entry.bind("<Return>", focus_next_widget)
+party_name_combo = ttk.Combobox(top_frame, state="readonly", width=20, justify="center", font=("Times", 15))
+party_name_combo.grid(row=1, column=2, padx=5)
 
+# Focus handling for party name combo
+party_name_combo.bind("<Return>", focus_next_widget)
+
+tk.Label(top_frame, text="0.0", bg="lightseagreen", font=("Times", 13, "bold")).grid(row=0, column=3, padx=20)
+tk.Label(top_frame, text="0.0", bg="lightseagreen", font=("Times", 13, "bold")).grid(row=1, column=3, padx=5)
 # Middle Frame - Line 2: Main Product, Sub Product, Gross Wt, Stones, Touch, Net Wt, MC@, MC
 middle_frame = tk.Frame(root, bg="lightseagreen")
 middle_frame.pack(pady=10)
 
-tk.Label(middle_frame, text="Main Product", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=0, padx=5)
+
+main_product_label=tk.Label(middle_frame, text="Main Product", bg="lightseagreen", font=("Times", 15))
+main_product_label.grid(row=0, column=0, padx=5)
 main_product_combo = ttk.Combobox(middle_frame, values=fetch_main_product(), state="readonly", width=20, justify="center", font=("Times",14))
 main_product_combo.grid(row=1, column=0, padx=5, sticky="w")
 main_product_combo.bind('<<ComboboxSelected>>',update_sub_products)
 main_product_combo.bind("<Return>", focus_next_widget)
+
 
 tk.Label(middle_frame, text="Design", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=1, padx=5)
 sub_product_combo = ttk.Combobox(middle_frame, state="readonly", width=20, justify="center", font=("Times",14))
@@ -641,7 +714,7 @@ narration_entry.bind("<Return>", add_item)
 
 
 # Frame for the Treeview and Scrollbars
-tree_frame = tk.Frame(root, bg="lightseagreen", width=300, height=800)
+tree_frame = tk.Frame(root, bg="lightseagreen", width=300, height=950)
 tree_frame.pack_propagate(False)  # Prevent the frame from resizing to fit its content
 tree_frame.pack(pady=10)
 
@@ -683,17 +756,17 @@ tree.column("#13", width=70, anchor=tk.CENTER)
 tree.column("#14", width=90, anchor=tk.CENTER)
 tree.column("#15", width=180, anchor=tk.W)
 
-# Add horizontal and vertical scrollbars
-x_scrollbar = tk.Scrollbar(tree_frame, orient="horizontal", command=tree.xview)
-y_scrollbar = tk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)
+# # Add horizontal and vertical scrollbars
+# x_scrollbar = tk.Scrollbar(tree_frame, orient="horizontal", command=tree.xview)
+# y_scrollbar = tk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)
 
-# Configure the Treeview to use the scrollbars
-tree.configure(xscrollcommand=x_scrollbar.set, yscrollcommand=y_scrollbar.set)
+# # Configure the Treeview to use the scrollbars
+# tree.configure(xscrollcommand=x_scrollbar.set, yscrollcommand=y_scrollbar.set)
 
 # Pack the Treeview and scrollbars
 tree.grid(row=0, column=0, sticky="nsew")
-y_scrollbar.grid(row=0, column=1, sticky="ns")
-x_scrollbar.grid(row=1, column=0, sticky="ew")
+# y_scrollbar.grid(row=0, column=1, sticky="ns")
+# x_scrollbar.grid(row=1, column=0, sticky="ew")
 
 # Configure the grid to make the Treeview expand with the frame
 tree_frame.grid_rowconfigure(0, weight=1)
