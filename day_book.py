@@ -18,9 +18,12 @@ def fetch_transactions(cursor, from_date, to_date):
         # Check if the dates are in the correct format (DD-MM-YYYY)
         datetime.strptime(from_date, "%d-%m-%Y")  # Check format of from_date
         datetime.strptime(to_date, "%d-%m-%Y")    # Check format of to_date
+         # Convert from_date and to_date to YYYY-MM-DD format
+        from_date = datetime.strptime(from_date, "%d-%m-%Y").strftime("%Y-%m-%d")
+        to_date = datetime.strptime(to_date, "%d-%m-%Y").strftime("%Y-%m-%d")
 
         cursor.execute(
-            "SELECT * FROM saved_data WHERE date BETWEEN ? AND ? ORDER BY id",
+            "SELECT * FROM saved_data WHERE date BETWEEN ? AND ? ORDER BY date",
             (from_date, to_date)
         )
         rows = cursor.fetchall()
@@ -122,12 +125,12 @@ def day_book(root):
     # Create a unique style for this Treeview widget
     style = ttk.Style()
     style.configure("custom.Treeview.Heading",
-                    font=("Arial", 14, "bold"),  # Font for the headings with larger size
-                    background="#4CAF50",  # Green background for headings
-                    foreground="white")  # White text color for headings
+                    font=("Times", 13, "bold"),  # Font for the headings with larger size
+                    background="yellow",  # Green background for headings
+                    foreground="black", relief="flat")  # White text color for headings
 
     style.configure("custom.Treeview",
-                    font=("Arial", 12),  # Font size for the rows
+                    font=("Times", 12),  # Font size for the rows
                     rowheight=30)  # Increase row height to accommodate larger text
 
     # Apply the unique style to the Treeview

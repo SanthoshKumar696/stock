@@ -233,6 +233,14 @@ def add_item(event=None):
     max_id = cursor.fetchone()[0]
     sl_no = (max_id+1) if max_id else 1
     date = date_entry.get()
+    ####################################################################################################
+    # Convert date to YYYY-MM-DD format before inserting into the database                             #
+    try:                                                                                               #
+        date = datetime.strptime(date, "%d-%m-%Y").strftime("%Y-%m-%d")                                #
+    except ValueError:                                                                                 #
+        messagebox.showerror("Date Error", "Invalid date format! Please use DD-MM-YYYY.")              #
+        return                                                                                         #
+    ####################################################################################################
     name = party_name_combo.get()
     transaction = transaction_combo.get()
     main_product = main_product_combo.get()
@@ -240,6 +248,9 @@ def add_item(event=None):
     gross_wt = float(gross_wt_entry.get())
     stones = float(stones_entry.get())
     touch = float(touch_entry.get())
+
+    # Insert the data into the Treeview
+    formatted_date = datetime.strptime(date, "%Y-%m-%d").strftime("%d-%m-%Y")  # Format the date
 
     mc_at = mc_at_entry.get()
     mc = mc_entry.get()
@@ -720,13 +731,13 @@ narration_entry.bind("<Return>", add_item)
 
 
 # Frame for the Treeview and Scrollbars
-tree_frame = tk.Frame(root, bg="lightseagreen", width=300, height=950)
-tree_frame.pack_propagate(False)  # Prevent the frame from resizing to fit its content
-tree_frame.pack(pady=10)
+tree_frame = tk.Frame(root, bg="lightseagreen")
+# tree_frame.pack_propagate(False)  # Prevent the frame from resizing to fit its content
+tree_frame.pack(pady=5)
 
 # Create the Treeview widget
 columns = ("#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10", "#11", "#12", "#13", "#14", "#15")
-tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=8)
+tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=12)
 
 # Set headings for each column
 tree.heading("#1", text="SLNo")
@@ -747,14 +758,14 @@ tree.heading("#15", text="Narration")
 
 # Set column width and alignment
 tree.column("#1", width=30, anchor=tk.CENTER)
-tree.column("#2", width=60, anchor=tk.CENTER)
+tree.column("#2", width=70, anchor=tk.CENTER)
 tree.column("#3", width=120, anchor=tk.W)
 tree.column("#4", width=120, anchor=tk.W)
 tree.column("#5", width=80, anchor=tk.W)
 tree.column("#6", width=100, anchor=tk.W)
-tree.column("#7", width=40, anchor=tk.CENTER)
-tree.column("#8", width=40, anchor=tk.CENTER)
-tree.column("#9", width=40, anchor=tk.CENTER)
+tree.column("#7", width=50, anchor=tk.CENTER)
+tree.column("#8", width=50, anchor=tk.CENTER)
+tree.column("#9", width=50, anchor=tk.CENTER)
 tree.column("#10", width=70, anchor=tk.CENTER)
 tree.column("#11", width=50, anchor=tk.CENTER)
 tree.column("#12", width=40, anchor=tk.CENTER)
@@ -762,17 +773,10 @@ tree.column("#13", width=70, anchor=tk.CENTER)
 tree.column("#14", width=90, anchor=tk.CENTER)
 tree.column("#15", width=180, anchor=tk.W)
 
-# # Add horizontal and vertical scrollbars
-# x_scrollbar = tk.Scrollbar(tree_frame, orient="horizontal", command=tree.xview)
-# y_scrollbar = tk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)
-
-# # Configure the Treeview to use the scrollbars
-# tree.configure(xscrollcommand=x_scrollbar.set, yscrollcommand=y_scrollbar.set)
 
 # Pack the Treeview and scrollbars
 tree.grid(row=0, column=0, sticky="nsew")
-# y_scrollbar.grid(row=0, column=1, sticky="ns")
-# x_scrollbar.grid(row=1, column=0, sticky="ew")
+
 
 # Configure the grid to make the Treeview expand with the frame
 tree_frame.grid_rowconfigure(0, weight=1)
