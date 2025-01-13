@@ -20,7 +20,7 @@ def fetch_transactions(cursor, from_date, to_date):
         datetime.strptime(to_date, "%d-%m-%Y")    # Check format of to_date
 
         cursor.execute(
-            "SELECT * FROM saved_data WHERE date BETWEEN ? AND ? ORDER BY date",
+            "SELECT * FROM saved_data WHERE date BETWEEN ? AND ? ORDER BY id",
             (from_date, to_date)
         )
         rows = cursor.fetchall()
@@ -119,36 +119,51 @@ def day_book(root):
                "Touch", "Net Wt", "MC@", "MC", "Rate", "Amount", "Narration")
     tree = ttk.Treeview(frame, columns=columns, show="headings")
 
-    # Style for Treeview columns
-    tree.heading("ID", text="ID", anchor="w")
-    tree.column("ID", width=70, anchor="w")  # Reduced width for ID
-    tree.heading("Date", text="Date", anchor="w")
+    # Create a unique style for this Treeview widget
+    style = ttk.Style()
+    style.configure("custom.Treeview.Heading",
+                    font=("Arial", 14, "bold"),  # Font for the headings with larger size
+                    background="#4CAF50",  # Green background for headings
+                    foreground="white")  # White text color for headings
+
+    style.configure("custom.Treeview",
+                    font=("Arial", 12),  # Font size for the rows
+                    rowheight=30)  # Increase row height to accommodate larger text
+
+    # Apply the unique style to the Treeview
+    tree.tag_configure("row_color", background="white")
+    tree.configure(style="custom.Treeview")
+
+    # Style columns
+    tree.heading("ID", text="ID", anchor="center")
+    tree.column("ID", width=70, anchor="center")  # Reduced width for ID
+    tree.heading("Date", text="Date", anchor="center")
     tree.column("Date", width=100, anchor="w")  # Reduced width for Date
-    tree.heading("Party Name", text="Party Name", anchor="w")
+    tree.heading("Party Name", text="Party Name", anchor="center")
     tree.column("Party Name", width=150, anchor="w")
-    tree.heading("Transaction", text="Transaction", anchor="w")
-    tree.column("Transaction", width=120, anchor="w")
-    tree.heading("Main Product", text="Main Product", anchor="w")
-    tree.column("Main Product", width=150, anchor="w")
-    tree.heading("Sub Product", text="Sub Product", anchor="w")
-    tree.column("Sub Product", width=150, anchor="w")
-    tree.heading("Gross Wt", text="Gross Wt", anchor="w")
-    tree.column("Gross Wt", width=100, anchor="w")
-    tree.heading("Stones", text="Stones", anchor="w")
+    tree.heading("Transaction", text="Transaction", anchor="center")
+    tree.column("Transaction", width=120, anchor="center")
+    tree.heading("Main Product", text="Main Product", anchor="center")
+    tree.column("Main Product", width=150, anchor="center")
+    tree.heading("Sub Product", text="Sub Product", anchor="center")
+    tree.column("Sub Product", width=150, anchor="center")
+    tree.heading("Gross Wt", text="Gross Wt", anchor="center")
+    tree.column("Gross Wt", width=100, anchor="center")
+    tree.heading("Stones", text="Stones", anchor="center")
     tree.column("Stones", width=80, anchor="w")  # Reduced width for Stones
-    tree.heading("Touch", text="Touch", anchor="w")
-    tree.column("Touch", width=80, anchor="w")  # Reduced width for Touch
-    tree.heading("Net Wt", text="Net Wt", anchor="w")
-    tree.column("Net Wt", width=100, anchor="w")
-    tree.heading("MC@", text="MC@", anchor="w")
+    tree.heading("Touch", text="Touch", anchor="center")
+    tree.column("Touch", width=80, anchor="center")  # Reduced width for Touch
+    tree.heading("Net Wt", text="Net Wt", anchor="center")
+    tree.column("Net Wt", width=100, anchor="center")
+    tree.heading("MC@", text="MC@", anchor="center")
     tree.column("MC@", width=80, anchor="w")  # Reduced width for MC@
-    tree.heading("MC", text="MC", anchor="w")
+    tree.heading("MC", text="MC", anchor="center")
     tree.column("MC", width=80, anchor="w")  # Reduced width for MC
-    tree.heading("Rate", text="Rate", anchor="w")
-    tree.column("Rate", width=100, anchor="w")
-    tree.heading("Amount", text="Amount", anchor="w")
-    tree.column("Amount", width=100, anchor="w")
-    tree.heading("Narration", text="Narration", anchor="w")
+    tree.heading("Rate", text="Rate", anchor="center")
+    tree.column("Rate", width=100, anchor="center")
+    tree.heading("Amount", text="Amount", anchor="center")
+    tree.column("Amount", width=100, anchor="center")
+    tree.heading("Narration", text="Narration", anchor="center")
     tree.column("Narration", width=200, anchor="w")
 
     tree.grid(row=0, column=0, sticky="nsew")
@@ -161,12 +176,5 @@ def day_book(root):
     # Configure row and column weights for resizing
     frame.grid_rowconfigure(0, weight=1)
     frame.grid_columnconfigure(0, weight=1)
-
-    # Apply custom style to the treeview heading
-    style = ttk.Style()
-    style.configure("Treeview.Heading",
-                    font=("Times", 12, "bold"),  # Bold font for the headings
-                    background="green",  # Green background for headings
-                    foreground="black")  # White text color for headings
 
 # Main window for starting the application
