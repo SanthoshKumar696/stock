@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sqlite3
 from datetime import datetime
-import webbrowser
 
 # Function to connect to the database
 def connect_database():
@@ -10,10 +9,25 @@ def connect_database():
     cursor = conn.cursor()
     return conn, cursor
 
-# Focus next widget function to move to the next entry field
 def focus_next_widget(event):
-    """ Move to the Next Widget """
     event.widget.tk_focusNext().focus()
+
+# Function to fetch transactions from the database
+def fetch_transactions(cursor, from_date, to_date):
+    try:
+        # Check if the dates are in the correct format (DD-MM-YYYY)
+        datetime.strptime(from_date, "%d-%m-%Y")  # Check format of from_date
+        datetime.strptime(to_date, "%d-%m-%Y")    # Check format of to_date
+
+        cursor.execute(
+            "SELECT * FROM saved_data WHERE date BETWEEN ? AND ? ORDER BY date",
+            (from_date, to_date)
+        )
+        rows = cursor.fetchall()
+        return rows
+    except ValueError as e:
+        messagebox.showerror("Date Error", f"Invalid date format! Use DD-MM-YYYY. Error: {e}")
+        return []
 
 # Function to display the day book window
 def day_book(root):
@@ -27,105 +41,6 @@ def day_book(root):
     day_book_window.geometry(f"{screen_width}x{screen_height}")  # Correct geometry format
     day_book_window.configure(bg="lightblue")
 
-    def fetch_transactions(cursor, from_date, to_date):
-        try:
-            # Check if the dates are in the correct format (DD-MM-YYYY)
-            datetime.strptime(from_date, "%d-%m-%Y")  # Check format of from_date
-            datetime.strptime(to_date, "%d-%m-%Y")    # Check format of to_date
-
-            print(f"Fetching transactions from {from_date} to {to_date}")
-            
-            # Execute the query using the dates as they are (DD-MM-YYYY)
-            cursor.execute(
-                "SELECT * FROM saved_data WHERE date BETWEEN ? AND ? ORDER BY id",
-                (from_date, to_date)  # Use dates as they are in DD-MM-YYYY format
-            )
-            rows = cursor.fetchall()
-
-            print(f"Transactions fetched: {rows}")
-
-            return rows
-        except ValueError as e:
-            messagebox.showerror("Date Error", f"Invalid date format! Use DD-MM-YYYY. Error: {e}")
-            return []
-
-    # Function to generate HTML report and open it in a web browser
-    def generate_html_report(transactions):
-        html_content = """
-        <html>
-    <head>
-        <style>
-            table {width: 100%; border-collapse: collapse;}
-            .center { text-align: center;}
-            tr:nth-child(even) {background-color: #f9f9f9;}  /* Alternating row colors */
-            tr:hover {background-color: #d3d3d3;} 
-            th, td {border: 1px solid black; padding: 8px; text-align: left;}
-            th {background-color: #f2f2f2;}
-            .date-column {width: 150px;}  /* Set width for the Date column */
-        </style>
-    </head>
-    <body>
-        <h2>Transaction Report</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th class="date-column">Date</th> <!-- Apply the class to Date header -->
-                    <th class="center">Party Name</th>
-                    <th>Transaction</th>
-                    <th>Main Product</th>
-                    <th>Sub Product</th>
-                    <th>Gross Wt</th>
-                    <th>Stones</th>
-                    <th>Touch</th>
-                    <th>Net Wt</th>
-                    <th>MC@</th>
-                    <th>MC</th>
-                    <th>Rate</th>
-                    <th>Amount</th>
-                    <th>Narration</th>
-                </tr>
-            </thead>
-            <tbody>
-    """
-        
-        # Loop through the transactions and create rows
-        for row in transactions:
-            html_content += "<tr>"
-            for index, cell in enumerate(row):
-                if index == 1:  # This is the "Date" column (index 1)
-                    html_content += f"<td class='date-column'>{cell}</td>"  # Apply the same class here
-                else:
-                    html_content += f"<td>{cell}</td>"
-            html_content += "</tr>"
-        
-        # Closing tags for the table and HTML
-        html_content += """
-                </tbody>
-            </table>
-        </body>
-        </html>
-        """
-        
-        # Try to save the HTML to a file
-        try:
-            # Log the path where the file is being saved
-            file_path = "transaction_report.html"
-            print(f"Saving the report to: {file_path}")
-            
-            # Save the HTML to a file
-            with open(file_path, "w") as file:
-                file.write(html_content)
-            
-            # Open the HTML file in the default web browser
-            webbrowser.open(file_path)
-            print("HTML report opened in browser.")
-        
-        except Exception as e:
-            print(f"Error while saving the HTML file: {e}")
-            messagebox.showerror("File Save Error", f"Error while saving the HTML file: {e}")
-
-    # Function to generate and show the report
     def show_report():
         from_date = from_date_entry.get()
         to_date = to_date_entry.get()
@@ -134,13 +49,35 @@ def day_book(root):
             messagebox.showerror("Input Error", "Both dates are required!")
             return
 
-        # Fetch transactions using the fetch_transactions function
         transactions = fetch_transactions(cursor, from_date, to_date)
         if transactions:
-            # Generate the HTML report and display it in the browser
-            generate_html_report(transactions)
+            update_treeview(transactions)
         else:
             messagebox.showinfo("No Data", "No transactions found for the given date range.")
+
+    def update_treeview(transactions):
+        # Clear existing rows in the Treeview
+        for row in tree.get_children():
+            tree.delete(row)
+
+        # Insert the fetched data into the Treeview with different row colors
+        for index, row in enumerate(transactions):
+            # Apply alternate row colors (light gray for even, white for odd)
+            if index % 2 == 0:
+                row_color = "#f0f0f0"  # Light gray for even rows
+            else:
+                row_color = "white"  # White for odd rows
+
+            tree.insert("", "end", values=row, tags=("row_color",))
+            tree.tag_configure("row_color", background=row_color)
+
+            # Apply specific styling for the 'Transaction' column based on its value
+            if "Sale" in row[3]:  # Assuming the 'Transaction' column is at index 3
+                tree.item(tree.get_children()[-1], tags=("transaction_sale",))
+                tree.tag_configure("transaction_sale", foreground="green")
+            elif "Purchase" in row[3]:
+                tree.item(tree.get_children()[-1], tags=("transaction_purchase",))
+                tree.tag_configure("transaction_purchase", foreground="red")
 
     # GUI layout
     tk.Label(
@@ -168,7 +105,68 @@ def day_book(root):
     button_frame = tk.Frame(day_book_window, bg="lightblue")
     button_frame.pack(pady=20)
 
-    tk.Button(button_frame, text="Report", bg="green", fg="white", font=("Arial", 12), command=show_report).grid(row=0, column=0, padx=10)
+    tk.Button(button_frame, text="Generate Report", bg="green", fg="white", font=("Arial", 12), command=show_report).grid(row=0, column=0, padx=10)
     tk.Button(button_frame, text="Clear", bg="orange", fg="white", font=("Arial", 12),
               command=lambda: [from_date_entry.delete(0, tk.END), to_date_entry.delete(0, tk.END)]).grid(row=0, column=1, padx=10)
     tk.Button(button_frame, text="Exit", bg="red", fg="white", font=("Arial", 12), command=day_book_window.destroy).grid(row=0, column=2, padx=10)
+
+    # Frame for Treeview and Scrollbar
+    frame = tk.Frame(day_book_window)
+    frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+    # Treeview for displaying transactions
+    columns = ("ID", "Date", "Party Name", "Transaction", "Main Product", "Sub Product", "Gross Wt", "Stones", 
+               "Touch", "Net Wt", "MC@", "MC", "Rate", "Amount", "Narration")
+    tree = ttk.Treeview(frame, columns=columns, show="headings")
+
+    # Style for Treeview columns
+    tree.heading("ID", text="ID", anchor="w")
+    tree.column("ID", width=70, anchor="w")  # Reduced width for ID
+    tree.heading("Date", text="Date", anchor="w")
+    tree.column("Date", width=100, anchor="w")  # Reduced width for Date
+    tree.heading("Party Name", text="Party Name", anchor="w")
+    tree.column("Party Name", width=150, anchor="w")
+    tree.heading("Transaction", text="Transaction", anchor="w")
+    tree.column("Transaction", width=120, anchor="w")
+    tree.heading("Main Product", text="Main Product", anchor="w")
+    tree.column("Main Product", width=150, anchor="w")
+    tree.heading("Sub Product", text="Sub Product", anchor="w")
+    tree.column("Sub Product", width=150, anchor="w")
+    tree.heading("Gross Wt", text="Gross Wt", anchor="w")
+    tree.column("Gross Wt", width=100, anchor="w")
+    tree.heading("Stones", text="Stones", anchor="w")
+    tree.column("Stones", width=80, anchor="w")  # Reduced width for Stones
+    tree.heading("Touch", text="Touch", anchor="w")
+    tree.column("Touch", width=80, anchor="w")  # Reduced width for Touch
+    tree.heading("Net Wt", text="Net Wt", anchor="w")
+    tree.column("Net Wt", width=100, anchor="w")
+    tree.heading("MC@", text="MC@", anchor="w")
+    tree.column("MC@", width=80, anchor="w")  # Reduced width for MC@
+    tree.heading("MC", text="MC", anchor="w")
+    tree.column("MC", width=80, anchor="w")  # Reduced width for MC
+    tree.heading("Rate", text="Rate", anchor="w")
+    tree.column("Rate", width=100, anchor="w")
+    tree.heading("Amount", text="Amount", anchor="w")
+    tree.column("Amount", width=100, anchor="w")
+    tree.heading("Narration", text="Narration", anchor="w")
+    tree.column("Narration", width=200, anchor="w")
+
+    tree.grid(row=0, column=0, sticky="nsew")
+
+    # Adding a horizontal scrollbar
+    x_scroll = tk.Scrollbar(frame, orient="horizontal", command=tree.xview)
+    x_scroll.grid(row=1, column=0, sticky="ew")
+    tree.configure(xscrollcommand=x_scroll.set)
+
+    # Configure row and column weights for resizing
+    frame.grid_rowconfigure(0, weight=1)
+    frame.grid_columnconfigure(0, weight=1)
+
+    # Apply custom style to the treeview heading
+    style = ttk.Style()
+    style.configure("Treeview.Heading",
+                    font=("Times", 12, "bold"),  # Bold font for the headings
+                    background="green",  # Green background for headings
+                    foreground="black")  # White text color for headings
+
+# Main window for starting the application

@@ -304,6 +304,7 @@ def handle_transaction(event):
     """Handles the transaction selection and updates party names."""
     selected_transaction = transaction_combo.get()
     print(f"Handling transaction: {selected_transaction}")
+    cash_receipt_label.config(text=selected_transaction)
     
     # Logic for handling different types of transactions using if-else or elif statements
     if selected_transaction == "Cash Receipt":
@@ -320,13 +321,13 @@ def handle_transaction(event):
 
     elif selected_transaction == "Purchase":
         print("Handling Purchase")
-        party_names = fetch_party_names('suppliers')
+        party_names = fetch_party_names('SUPPLIER')
         party_name_combo["values"] = party_names
         party_name_combo.set("")  # Reset selection
 
     elif selected_transaction == "Purchase Return":
         print("Handling Purchase Return")
-        party_names = fetch_party_names('suppliers')
+        party_names = fetch_party_names('SUPPLIER')
         party_name_combo["values"] = party_names
         party_name_combo.set("")  # Reset selection
 
@@ -591,7 +592,7 @@ report_menu.add_command(label="Party Balance", command=lambda:party_balance(root
 #Exit
 exit_menu.add_command(label="Exit", command=exit_program)
 
-cash_receipt_label = tk.Label(root, text="Cash Receipt", font=("Times", 25, "bold"), bg="lightseagreen", fg="blue")
+cash_receipt_label = tk.Label(root, text="Cash Receipt", font=("Times", 25, "bold"), bg="lightseagreen", fg="red")
 cash_receipt_label.pack(pady=10)
 #############################################################################################################################
 # rtcytfvugybiunoim,iuyd
@@ -608,20 +609,25 @@ date_entry.insert(0, datetime.now().strftime("%d-%m-%Y"))
 date_entry.grid(row=1, column=0, padx=5, sticky="w")
 date_entry.bind("<Return>", focus_next_widget)
 
-tk.Label(top_frame, text="Transaction", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=1, padx=5)
-transaction_combo = ttk.Combobox(top_frame, values=["Cash Receipt", "Cash Payment", "Purchase", "Purchase Return", "Sales", "Sales Return", "Metal Receipt", "Metal Issue", "Rate Cut Sales", "Rate Cut Purchase", "Achari Receipt", "Achari Issue", "Approval Issue", "Approval Receipt"], width=15, justify="center", font=("Times",14))
-transaction_combo.grid(row=1, column=1, padx=5, sticky="w")
- # Bind to handle the transaction selection
-transaction_combo.bind("<Return>", focus_next_widget)
-
 # Function to update the label when a value is selected
 def update_label(event):
     selected_transaction = transaction_combo.get()  # Get selected value
     cash_receipt_label.config(text=selected_transaction)  # Update label text
 
+
+tk.Label(top_frame, text="Transaction", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=1, padx=5)
+transaction_combo = ttk.Combobox(top_frame, values=["Cash Receipt", "Cash Payment", "Purchase", "Purchase Return", "Sales", "Sales Return", "Metal Receipt", "Metal Issue", "Rate Cut Sales", "Rate Cut Purchase", "Achari Receipt", "Achari Issue", "Approval Issue", "Approval Receipt"], width=15, justify="center", font=("Times",14))
+transaction_combo.grid(row=1, column=1, padx=5, sticky="w")
 # Bind the selection event to the function
-transaction_combo.bind("<<ComboboxSelected>>", update_label)
+
+
+ # Bind to handle the transaction selection
+transaction_combo.bind("<Return>", focus_next_widget)
+# transaction_combo.bind("<<ComboboxSelected>>", update_label)
 transaction_combo.bind('<<ComboboxSelected>>', handle_transaction) 
+
+
+
 
 # Party Name ComboBox
 tk.Label(top_frame, text="Party Name", bg="lightseagreen", font=("Times", 15)).grid(row=0, column=2, padx=5)
